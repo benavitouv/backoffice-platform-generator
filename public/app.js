@@ -25,6 +25,9 @@ const logoError = document.querySelector('#logo-error');
 
 const languageInput = document.querySelector('#language-input');
 const languageError = document.querySelector('#language-error');
+const langSelect = document.querySelector('#lang-select');
+const langArrow = document.querySelector('#lang-arrow');
+const langListbox = document.querySelector('#lang-listbox');
 
 const steps = document.querySelectorAll('.step');
 const errorPanel = document.querySelector('#error-panel');
@@ -323,3 +326,114 @@ generateAnotherBtn.addEventListener('click', () => {
 retryBtn.addEventListener('click', () => {
   showView(setupView);
 });
+
+// ── Language custom select ──
+(() => {
+  let isOpen = false;
+  let activeIndex = -1;
+
+  const getVisible = () =>
+    Array.from(langListbox.querySelectorAll('.lang-option')).filter(
+      o => o.style.display !== 'none'
+    );
+
+  const openDropdown = (showAll = false) => {
+    filterOptions(showAll ? '' : languageInput.value);
+    langListbox.removeAttribute('hidden');
+    langSelect.setAttribute('aria-expanded', 'true');
+    isOpen = true;
+    activeIndex = -1;
+    const sel = langListbox.querySelector('.lang-option.is-selected');
+    if (sel) sel.scrollIntoView({ block: 'nearest' });
+  };
+
+  const closeDropdown = () => {
+    langListbox.setAttribute('hidden', '');
+    langSelect.setAttribute('aria-expanded', 'false');
+    isOpen = false;
+    activeIndex = -1;
+  };
+
+  const filterOptions = (query) => {
+    const q = query.trim().toLowerCase();
+    langListbox.querySelectorAll('.lang-option').forEach(opt => {
+      opt.style.display = !q || opt.dataset.value.toLowerCase().includes(q) ? '' : 'none';
+    });
+  };
+
+  const selectOption = (value) => {
+    languageInput.value = value;
+    languageError.textContent = '';
+    langListbox.querySelectorAll('.lang-option').forEach(opt => {
+      opt.classList.toggle('is-selected', opt.dataset.value === value);
+    });
+    closeDropdown();
+  };
+
+  // Arrow button — always opens showing all options
+  langArrow.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (isOpen) {
+      closeDropdown();
+    } else {
+      languageInput.focus();
+      openDropdown(true);
+    }
+  });
+
+  // Clicking into the input — open showing all options, select all text
+  languageInput.addEventListener('focus', () => {
+    if (!isOpen) {
+      openDropdown(true);
+    }
+    languageInput.select();
+  });
+
+  // Typing — filter in real-time
+  languageInput.addEventListener('input', () => {
+    if (!isOpen) openDropdown(false);
+    filterOptions(languageInput.value);
+    activeIndex = -1;
+  });
+
+  // Keyboard navigation
+  languageInput.addEventListener('keydown', (e) => {
+    const visible = getVisible();
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (!isOpen) openDropdown(true);
+      activeIndex = Math.min(activeIndex + 1, visible.length - 1);
+      visible.forEach((o, i) => o.classList.toggle('is-active', i === activeIndex));
+      visible[activeIndex]?.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIndex = Math.max(activeIndex - 1, 0);
+      visible.forEach((o, i) => o.classList.toggle('is-active', i === activeIndex));
+      visible[activeIndex]?.scrollIntoView({ block: 'nearest' });
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (isOpen && activeIndex >= 0 && visible[activeIndex]) {
+        selectOption(visible[activeIndex].dataset.value);
+      }
+    } else if (e.key === 'Escape') {
+      closeDropdown();
+    }
+  });
+
+  // Click on an option
+  langListbox.addEventListener('mousedown', (e) => {
+    const opt = e.target.closest('.lang-option');
+    if (opt?.dataset.value) {
+      e.preventDefault(); // prevent blur before select
+      selectOption(opt.dataset.value);
+    }
+  });
+
+  // Click outside to close
+  document.addEventListener('click', (e) => {
+    if (!langSelect.contains(e.target)) closeDropdown();
+  });
+
+  // Set initial value
+  selectOption('English');
+})();

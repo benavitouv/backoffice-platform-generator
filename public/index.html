@@ -170,52 +170,55 @@
 
             <label class="field">
               <span class="field-label">Target Language</span>
-              <div class="language-input-wrap">
+              <div class="lang-select" id="lang-select" role="combobox" aria-expanded="false" aria-haspopup="listbox">
                 <input
                   id="language-input"
                   type="text"
                   name="language"
-                  list="languages-list"
-                  value="English"
-                  placeholder="Search for a language..."
+                  placeholder="Search languages..."
                   autocomplete="off"
                   data-lpignore="true"
+                  aria-autocomplete="list"
+                  aria-controls="lang-listbox"
                   required
                 />
-                <datalist id="languages-list">
-                  <option value="English">
-                  <option value="Hebrew">
-                  <option value="Arabic">
-                  <option value="French">
-                  <option value="Spanish">
-                  <option value="German">
-                  <option value="Portuguese">
-                  <option value="Italian">
-                  <option value="Russian">
-                  <option value="Japanese">
-                  <option value="Chinese (Simplified)">
-                  <option value="Chinese (Traditional)">
-                  <option value="Korean">
-                  <option value="Turkish">
-                  <option value="Dutch">
-                  <option value="Polish">
-                  <option value="Swedish">
-                  <option value="Norwegian">
-                  <option value="Danish">
-                  <option value="Finnish">
-                  <option value="Greek">
-                  <option value="Hindi">
-                  <option value="Bengali">
-                  <option value="Urdu">
-                  <option value="Persian">
-                  <option value="Thai">
-                  <option value="Vietnamese">
-                  <option value="Indonesian">
-                  <option value="Romanian">
-                  <option value="Hungarian">
-                  <option value="Czech">
-                  <option value="Ukrainian">
-                </datalist>
+                <button type="button" id="lang-arrow" class="lang-arrow" tabindex="-1" aria-label="Open language list">
+                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>
+                </button>
+                <ul id="lang-listbox" class="lang-listbox" role="listbox" aria-label="Languages" hidden>
+                  <li role="option" class="lang-option" data-value="English">English</li>
+                  <li role="option" class="lang-option" data-value="Hebrew">Hebrew</li>
+                  <li role="option" class="lang-option" data-value="Arabic">Arabic</li>
+                  <li role="option" class="lang-option" data-value="French">French</li>
+                  <li role="option" class="lang-option" data-value="Spanish">Spanish</li>
+                  <li role="option" class="lang-option" data-value="German">German</li>
+                  <li role="option" class="lang-option" data-value="Portuguese">Portuguese</li>
+                  <li role="option" class="lang-option" data-value="Italian">Italian</li>
+                  <li role="option" class="lang-option" data-value="Russian">Russian</li>
+                  <li role="option" class="lang-option" data-value="Japanese">Japanese</li>
+                  <li role="option" class="lang-option" data-value="Chinese (Simplified)">Chinese (Simplified)</li>
+                  <li role="option" class="lang-option" data-value="Chinese (Traditional)">Chinese (Traditional)</li>
+                  <li role="option" class="lang-option" data-value="Korean">Korean</li>
+                  <li role="option" class="lang-option" data-value="Turkish">Turkish</li>
+                  <li role="option" class="lang-option" data-value="Dutch">Dutch</li>
+                  <li role="option" class="lang-option" data-value="Polish">Polish</li>
+                  <li role="option" class="lang-option" data-value="Swedish">Swedish</li>
+                  <li role="option" class="lang-option" data-value="Norwegian">Norwegian</li>
+                  <li role="option" class="lang-option" data-value="Danish">Danish</li>
+                  <li role="option" class="lang-option" data-value="Finnish">Finnish</li>
+                  <li role="option" class="lang-option" data-value="Greek">Greek</li>
+                  <li role="option" class="lang-option" data-value="Hindi">Hindi</li>
+                  <li role="option" class="lang-option" data-value="Bengali">Bengali</li>
+                  <li role="option" class="lang-option" data-value="Urdu">Urdu</li>
+                  <li role="option" class="lang-option" data-value="Persian">Persian</li>
+                  <li role="option" class="lang-option" data-value="Thai">Thai</li>
+                  <li role="option" class="lang-option" data-value="Vietnamese">Vietnamese</li>
+                  <li role="option" class="lang-option" data-value="Indonesian">Indonesian</li>
+                  <li role="option" class="lang-option" data-value="Romanian">Romanian</li>
+                  <li role="option" class="lang-option" data-value="Hungarian">Hungarian</li>
+                  <li role="option" class="lang-option" data-value="Czech">Czech</li>
+                  <li role="option" class="lang-option" data-value="Ukrainian">Ukrainian</li>
+                </ul>
               </div>
               <p class="field-error" id="language-error" aria-live="polite"></p>
             </label>
