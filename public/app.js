@@ -1,6 +1,7 @@
 // ── State ──
 let selectedTemplate = null;
 let logoFile = null;
+let abortController = null;
 
 // ── DOM refs ──
 const setupView = document.querySelector('#setup-view');
@@ -33,6 +34,7 @@ const steps = document.querySelectorAll('.step');
 const errorPanel = document.querySelector('#error-panel');
 const errorMessage = document.querySelector('#error-message');
 const retryBtn = document.querySelector('#retry-btn');
+const backBtn = document.querySelector('#back-btn');
 
 const resultLink = document.querySelector('#result-link');
 const openSiteBtn = document.querySelector('#open-site-btn');
@@ -256,6 +258,8 @@ generatorForm.addEventListener('submit', async (e) => {
   formData.append('language', languageInput.value.trim());
   formData.append('logo', logoFile, logoFile.name);
 
+  abortController = new AbortController();
+
   try {
     const generationPromise = new Promise((resolve, reject) => {
       resolveGeneration = resolve;
@@ -265,6 +269,7 @@ generatorForm.addEventListener('submit', async (e) => {
     const response = await fetch('/api/generate', {
       method: 'POST',
       body: formData,
+      signal: abortController.signal,
     });
 
     if (!response.ok) {
@@ -278,6 +283,7 @@ generatorForm.addEventListener('submit', async (e) => {
     const liveUrl = await generationPromise;
     showResult(liveUrl);
   } catch (err) {
+    if (err.name === 'AbortError') return; // user cancelled — already navigated back
     showError(err.message || 'An unexpected error occurred.');
   }
 });
@@ -319,6 +325,13 @@ copyUrlBtn.addEventListener('click', async () => {
 
 // ── Generate another ──
 generateAnotherBtn.addEventListener('click', () => {
+  showView(setupView);
+});
+
+// ── Back button ──
+backBtn.addEventListener('click', () => {
+  abortController?.abort();
+  abortController = null;
   showView(setupView);
 });
 

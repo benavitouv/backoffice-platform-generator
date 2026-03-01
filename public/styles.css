@@ -615,6 +615,36 @@ body {
   color: var(--muted);
 }
 
+/* ── Progress back button ── */
+.progress-back-wrap {
+  text-align: center;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.back-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.back-btn:hover {
+  color: var(--ink);
+  background: var(--border);
+}
+
 /* ── Error panel ── */
 .error-panel {
   background: #fff1f2;
