@@ -1,17 +1,13 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/*.mjs", "use": "@vercel/node" },
+    { "src": "api/generate.mjs", "use": "@vercel/node", "config": { "maxDuration": 300 } },
+    { "src": "api/health.mjs", "use": "@vercel/node" },
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1.mjs" },
     { "src": "/", "dest": "/public/index.html" },
     { "src": "/(.*)", "dest": "/public/$1" }
-  ],
-  "functions": {
-    "api/generate.mjs": {
-      "maxDuration": 300
-    }
-  }
+  ]
 }
