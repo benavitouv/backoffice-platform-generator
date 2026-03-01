@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Form 17 Request - Health Fund</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="brand">
+        <div class="logo">
+          <img src="logo.png" alt="Health Fund Logo" />
+        </div>
+        <div class="brand-text">
+          <p class="eyebrow">Healthcare System</p>
+          <h1>Form 17 Request</h1>
+          <p class="subhead">
+            Fill in your details, attach your medical referral, and the system will forward your request for approval. If everything is correct, you will receive Form 17.
+          </p>
+        </div>
+      </header>
+
+      <form
+        id="claim-form"
+        class="card"
+        autocomplete="off"
+        data-lpignore="true"
+        data-1p-ignore="true"
+        data-form-type="other"
+        data-bwignore="true"
+      >
+        <div class="field-grid">
+          <label class="field">
+            <span>First Name</span>
+            <input
+              type="text"
+              name="first_name"
+              autocomplete="off"
+              data-lpignore="true"
+              data-1p-ignore="true"
+              data-form-type="other"
+              data-bwignore="true"
+              required
+              placeholder="e.g. John"
+            />
+          </label>
+          <label class="field">
+            <span>Last Name</span>
+            <input
+              type="text"
+              name="last_name"
+              autocomplete="off"
+              data-lpignore="true"
+              data-1p-ignore="true"
+              data-form-type="other"
+              data-bwignore="true"
+              required
+              placeholder="e.g. Smith"
+            />
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Contact Email</span>
+          <input
+            type="email"
+            name="email"
+            autocomplete="off"
+            data-lpignore="true"
+            data-1p-ignore="true"
+            data-form-type="other"
+            data-bwignore="true"
+            required
+            placeholder="name@example.com"
+          />
+        </label>
+
+        <label class="field">
+          <span>Requested Hospital</span>
+          <select name="hospital" required>
+            <option value="">Select a hospital</option>
+            <option value="sheba">Sheba Medical Center – Ramat Gan</option>
+            <option value="rambam">Rambam Medical Center – Haifa</option>
+            <option value="hadassah-ein-kerem">Hadassah Ein Kerem Medical Center – Jerusalem</option>
+            <option value="ichilov">Ichilov Medical Center – Tel Aviv</option>
+            <option value="soroka">Soroka Medical Center – Beer Sheva</option>
+            <option value="schneider">Schneider Children's Medical Center – Petah Tikva</option>
+            <option value="barzilai">Barzilai Medical Center – Ashkelon</option>
+            <option value="wolfson">Wolfson Medical Center – Holon</option>
+            <option value="meir">Meir Medical Center – Kfar Saba</option>
+            <option value="assaf-harofeh">Assaf Harofeh Medical Center – Be'er Ya'akov</option>
+            <option value="shaare-zedek">Shaare Zedek Medical Center – Jerusalem</option>
+            <option value="poriya">Poriya Medical Center – Tiberias</option>
+            <option value="kaplan">Kaplan Medical Center – Rehovot</option>
+            <option value="hadassah-har-hatzofim">Hadassah Mount Scopus Medical Center – Jerusalem</option>
+            <option value="carmel">Carmel Medical Center – Haifa</option>
+            <option value="emek">Emek Medical Center – Afula</option>
+            <option value="hillel-yaffe">Hillel Yaffe Medical Center – Hadera</option>
+            <option value="bnai-zion">Bnai Zion Medical Center – Haifa</option>
+            <option value="laniado">Laniado Medical Center – Netanya</option>
+            <option value="ziv">Ziv Medical Center – Safed</option>
+            <option value="rabin">Rabin Medical Center – Petah Tikva</option>
+            <option value="yoseftal">Yoseftal Medical Center – Eilat</option>
+            <option value="loewenstein">Loewenstein Rehabilitation Center – Ra'anana</option>
+            <option value="herzfeld">Herzfeld Medical Center – Gedera</option>
+            <option value="geha">Geha Mental Health Center – Petah Tikva</option>
+            <option value="shalvata">Shalvata Mental Health Center – Hod HaSharon</option>
+            <option value="rivka">Rivka Geriatric Rehabilitation Center – Petah Tikva</option>
+          </select>
+        </label>
+
+        <div class="field">
+          <span>Medical Referral</span>
+          <label id="drop-zone" class="drop-zone">
+            <input
+              id="claim_file"
+              name="claim_file"
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+              required
+            />
+            <div class="drop-content">
+              <div class="drop-icon">⇣</div>
+              <div>
+                <strong>Drag file here</strong>
+                <p>or click to browse from your computer</p>
+              </div>
+            </div>
+            <div class="file-meta">
+              <span id="file-name">No file selected</span>
+              <span id="file-size">—</span>
+            </div>
+          </label>
+          <p class="hint">Allowed files: PDF, JPG, PNG or Word. Recommended size up to 15MB.</p>
+        </div>
+
+        <button id="submit-btn" class="submit" type="submit">
+          <span>Submit Form 17 Request</span>
+          <span class="spinner" aria-hidden="true"></span>
+        </button>
+
+        <div id="status" class="status" role="status" aria-live="polite">
+          <span class="status-check" aria-hidden="true">
+            <svg viewBox="0 0 52 52" role="presentation">
+              <circle cx="26" cy="26" r="24" fill="none" />
+              <path d="M15 27l8 8 14-16" fill="none" />
+            </svg>
+          </span>
+          <span id="status-text"></span>
+        </div>
+      </form>
+
+      <p class="footnote">
+        Documents are stored securely and forwarded directly to your health fund.
+      </p>
+    </main>
+
+    <div id="success-modal" class="success-modal" aria-hidden="true">
+      <div class="success-card" role="dialog" aria-modal="true" aria-labelledby="success-title">
+        <div class="success-icon" aria-hidden="true">
+          <svg viewBox="0 0 120 120" role="presentation">
+            <circle cx="60" cy="60" r="54" fill="none" />
+            <path d="M36 64l16 16 32-36" fill="none" />
+          </svg>
+        </div>
+        <h2 id="success-title">Request submitted successfully</h2>
+        <p>We received your medical referral and are forwarding it for approval. If everything is correct, you will receive Form 17.</p>
+        <button id="success-close" class="ghost" type="button">Submit another request</button>
+      </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+    <script>
+      (() => {
+        const s = document.createElement('script');
+        s.src = 'https://wonderful.app.demo.wonderful.ai/embed/wonderful-chat.js';
+        s.onload = () => {
+          new window.WonderfulChat({
+            environment: "wonderful.api.demo.wonderful.ai",
+            agentId: "312962dc-f9c2-434d-80fc-23d895fa332c",
+
+            // Core settings
+            agentName: 'Health Fund Representative',
+            buttonText: 'Chat with Agent',
+            placeholderText: 'Type a message here...',
+            isRTL: false,
+
+            // Main theme colors
+            primaryColor: '#64748b',
+            accentColor: '#475569',
+            textColor: '#1e293b',
+
+            // Chat appearance
+            headerBgColor: '#64748b',
+            headerTextColor: '#ffffff',
+
+            // Message bubbles
+            userBubbleColor: '#64748b',
+            userTextColor: '#ffffff',
+            agentBubbleColor: '#ffffff',
+            agentTextColor: '#1e293b',
+
+            // Background colors
+            windowBgColor: '#f8fafc',
+            messagesBgColor: '#ffffff',
+            inputBgColor: '#ffffff',
+
+            // Status indicators
+            statusColor: '#64748b',
+            errorColor: '#F44336',
+
+            // Optional logo (can be removed)
+            logoUrl: 'logo.png'
+          });
+        };
+        document.head.appendChild(s);
+      })();
+    </script>
+  </body>
+</html>

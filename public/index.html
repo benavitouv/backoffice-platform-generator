@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Demo Site Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+
+    <!-- ============ SETUP VIEW ============ -->
+    <div id="setup-view" class="view">
+      <main class="shell">
+        <header class="page-header">
+          <div class="header-badge">Powered by Claude AI</div>
+          <h1>Demo Site Generator</h1>
+          <p class="header-sub">Choose a template, enter your customer's details, and get a live branded demo site in under a minute.</p>
+        </header>
+
+        <!-- Template Selector -->
+        <section class="section">
+          <h2 class="section-title">1. Choose a Template</h2>
+          <div class="template-grid" role="group" aria-label="Template selection">
+
+            <button class="template-card" data-template="form17" type="button" aria-pressed="false">
+              <div class="card-preview">
+                <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <!-- Header area -->
+                  <rect x="8" y="8" width="42" height="28" rx="5" fill="#e2e8f0"/>
+                  <rect x="58" y="12" width="90" height="9" rx="3" fill="#cbd5e1"/>
+                  <rect x="58" y="26" width="60" height="5" rx="2" fill="#e2e8f0"/>
+                  <!-- Form card -->
+                  <rect x="8" y="44" width="184" height="86" rx="8" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+                  <!-- Two name inputs -->
+                  <rect x="16" y="54" width="80" height="13" rx="4" fill="#f1f5f9"/>
+                  <rect x="104" y="54" width="80" height="13" rx="4" fill="#f1f5f9"/>
+                  <!-- Email input -->
+                  <rect x="16" y="73" width="168" height="13" rx="4" fill="#f1f5f9"/>
+                  <!-- Hospital select -->
+                  <rect x="16" y="92" width="168" height="13" rx="4" fill="#f1f5f9"/>
+                  <!-- Submit button -->
+                  <rect x="44" y="112" width="112" height="11" rx="5" fill="currentColor" opacity="0.65"/>
+                </svg>
+              </div>
+              <div class="card-info">
+                <strong>Healthcare Form</strong>
+                <span>Form 17 — health fund referral submission with hospital selection</span>
+              </div>
+              <div class="card-check" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M5 8.5l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </button>
+
+            <button class="template-card" data-template="insurance" type="button" aria-pressed="false">
+              <div class="card-preview">
+                <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <!-- Header -->
+                  <rect x="8" y="8" width="42" height="28" rx="5" fill="#e2e8f0"/>
+                  <rect x="58" y="12" width="90" height="9" rx="3" fill="#cbd5e1"/>
+                  <rect x="58" y="26" width="60" height="5" rx="2" fill="#e2e8f0"/>
+                  <!-- Form card -->
+                  <rect x="8" y="44" width="184" height="86" rx="8" fill="white" stroke="#e2e8f0" stroke-width="1.5"/>
+                  <!-- Two name inputs -->
+                  <rect x="16" y="54" width="80" height="13" rx="4" fill="#f1f5f9"/>
+                  <rect x="104" y="54" width="80" height="13" rx="4" fill="#f1f5f9"/>
+                  <!-- Email input -->
+                  <rect x="16" y="73" width="168" height="13" rx="4" fill="#f1f5f9"/>
+                  <!-- File drop zone -->
+                  <rect x="16" y="92" width="168" height="17" rx="4" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4 2"/>
+                  <!-- Submit button -->
+                  <rect x="44" y="116" width="112" height="10" rx="5" fill="currentColor" opacity="0.65"/>
+                </svg>
+              </div>
+              <div class="card-info">
+                <strong>Insurance Portal</strong>
+                <span>Insurance claim submission with document upload</span>
+              </div>
+              <div class="card-check" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M5 8.5l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </button>
+
+            <button class="template-card" data-template="loan" type="button" aria-pressed="false">
+              <div class="card-preview">
+                <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <!-- Header (dark bank style) -->
+                  <rect x="8" y="8" width="42" height="28" rx="5" fill="#e8e8e8"/>
+                  <rect x="58" y="12" width="90" height="9" rx="3" fill="#d0d0d0"/>
+                  <rect x="58" y="26" width="60" height="5" rx="2" fill="#e8e8e8"/>
+                  <!-- Form card -->
+                  <rect x="8" y="44" width="184" height="86" rx="8" fill="white" stroke="#e8e8e8" stroke-width="1.5"/>
+                  <!-- Two name inputs -->
+                  <rect x="16" y="54" width="80" height="13" rx="4" fill="#f5f5f5"/>
+                  <rect x="104" y="54" width="80" height="13" rx="4" fill="#f5f5f5"/>
+                  <!-- Email input -->
+                  <rect x="16" y="73" width="168" height="13" rx="4" fill="#f5f5f5"/>
+                  <!-- File drop zone -->
+                  <rect x="16" y="92" width="168" height="17" rx="4" fill="#fafafa" stroke="#d0d0d0" stroke-width="1" stroke-dasharray="4 2"/>
+                  <!-- Submit button -->
+                  <rect x="44" y="116" width="112" height="10" rx="5" fill="currentColor" opacity="0.65"/>
+                </svg>
+              </div>
+              <div class="card-info">
+                <strong>Bank Loan Portal</strong>
+                <span>Loan application submission with document upload</span>
+              </div>
+              <div class="card-check" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M5 8.5l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </button>
+
+          </div>
+          <p id="template-error" class="field-error" aria-live="polite"></p>
+        </section>
+
+        <!-- Customer Details Form -->
+        <section class="section">
+          <h2 class="section-title">2. Customer Details</h2>
+          <form id="generator-form" class="details-card" autocomplete="off" novalidate>
+
+            <label class="field">
+              <span class="field-label">Customer Name</span>
+              <input
+                id="customer-name"
+                type="text"
+                name="customerName"
+                placeholder="e.g. Acme Insurance"
+                autocomplete="off"
+                data-lpignore="true"
+                required
+              />
+              <p class="field-error" id="name-error" aria-live="polite"></p>
+            </label>
+
+            <label class="field">
+              <span class="field-label">Customer Logo</span>
+              <div id="logo-drop-zone" class="logo-drop-zone" tabindex="0" role="button" aria-label="Upload logo file">
+                <input
+                  id="logo-input"
+                  type="file"
+                  name="logo"
+                  accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                  aria-hidden="true"
+                />
+                <div id="logo-drop-content" class="logo-drop-content">
+                  <div class="logo-drop-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4-4 4 4M12 12l4-4 4 4M12 12v8"/><rect x="3" y="3" width="18" height="13" rx="2"/></svg>
+                  </div>
+                  <div>
+                    <strong>Drop logo here</strong>
+                    <p>or click to browse — PNG, JPG, SVG (max 2MB)</p>
+                  </div>
+                </div>
+                <div id="logo-preview-content" class="logo-preview-content" hidden>
+                  <img id="logo-preview-img" src="" alt="Logo preview" />
+                  <div class="logo-preview-meta">
+                    <span id="logo-file-name"></span>
+                    <button type="button" id="logo-remove-btn" class="logo-remove" aria-label="Remove logo">×</button>
+                  </div>
+                </div>
+              </div>
+              <p class="field-error" id="logo-error" aria-live="polite"></p>
+            </label>
+
+            <label class="field">
+              <span class="field-label">Target Language</span>
+              <div class="language-input-wrap">
+                <input
+                  id="language-input"
+                  type="text"
+                  name="language"
+                  list="languages-list"
+                  value="English"
+                  placeholder="Search for a language..."
+                  autocomplete="off"
+                  data-lpignore="true"
+                  required
+                />
+                <datalist id="languages-list">
+                  <option value="English">
+                  <option value="Hebrew">
+                  <option value="Arabic">
+                  <option value="French">
+                  <option value="Spanish">
+                  <option value="German">
+                  <option value="Portuguese">
+                  <option value="Italian">
+                  <option value="Russian">
+                  <option value="Japanese">
+                  <option value="Chinese (Simplified)">
+                  <option value="Chinese (Traditional)">
+                  <option value="Korean">
+                  <option value="Turkish">
+                  <option value="Dutch">
+                  <option value="Polish">
+                  <option value="Swedish">
+                  <option value="Norwegian">
+                  <option value="Danish">
+                  <option value="Finnish">
+                  <option value="Greek">
+                  <option value="Hindi">
+                  <option value="Bengali">
+                  <option value="Urdu">
+                  <option value="Persian">
+                  <option value="Thai">
+                  <option value="Vietnamese">
+                  <option value="Indonesian">
+                  <option value="Romanian">
+                  <option value="Hungarian">
+                  <option value="Czech">
+                  <option value="Ukrainian">
+                </datalist>
+              </div>
+              <p class="field-error" id="language-error" aria-live="polite"></p>
+            </label>
+
+            <button id="generate-btn" class="generate-btn" type="submit">
+              <span>Generate Demo Site</span>
+              <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+            </button>
+
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <!-- ============ PROGRESS VIEW ============ -->
+    <div id="progress-view" class="view" hidden>
+      <main class="shell shell--narrow">
+        <div class="progress-header">
+          <div class="progress-spinner" aria-hidden="true"></div>
+          <h2>Building your demo site...</h2>
+          <p>Claude is customizing the template and deploying it live. This takes about 30–60 seconds.</p>
+        </div>
+
+        <div class="steps-card">
+          <div class="step" data-step="1" data-status="pending">
+            <div class="step-icon" aria-hidden="true">
+              <svg class="step-check" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg class="step-spinner" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" stroke-dasharray="40" stroke-dashoffset="15" stroke-linecap="round"/></svg>
+              <span class="step-num">1</span>
+            </div>
+            <div class="step-body">
+              <strong>Analyzing logo &amp; customizing template</strong>
+              <span>Claude extracts brand colors and translates all content</span>
+            </div>
+          </div>
+
+          <div class="step" data-step="2" data-status="pending">
+            <div class="step-icon" aria-hidden="true">
+              <svg class="step-check" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg class="step-spinner" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" stroke-dasharray="40" stroke-dashoffset="15" stroke-linecap="round"/></svg>
+              <span class="step-num">2</span>
+            </div>
+            <div class="step-body">
+              <strong>Creating GitHub repository</strong>
+              <span>A new repo is created for this customer</span>
+            </div>
+          </div>
+
+          <div class="step" data-step="3" data-status="pending">
+            <div class="step-icon" aria-hidden="true">
+              <svg class="step-check" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg class="step-spinner" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" stroke-dasharray="40" stroke-dashoffset="15" stroke-linecap="round"/></svg>
+              <span class="step-num">3</span>
+            </div>
+            <div class="step-body">
+              <strong>Pushing files to GitHub</strong>
+              <span>All customized files committed in a single push</span>
+            </div>
+          </div>
+
+          <div class="step" data-step="4" data-status="pending">
+            <div class="step-icon" aria-hidden="true">
+              <svg class="step-check" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg class="step-spinner" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" stroke-dasharray="40" stroke-dashoffset="15" stroke-linecap="round"/></svg>
+              <span class="step-num">4</span>
+            </div>
+            <div class="step-body">
+              <strong>Creating Vercel project</strong>
+              <span>Linked to the GitHub repo with environment variables</span>
+            </div>
+          </div>
+
+          <div class="step" data-step="5" data-status="pending">
+            <div class="step-icon" aria-hidden="true">
+              <svg class="step-check" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg class="step-spinner" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" stroke-dasharray="40" stroke-dashoffset="15" stroke-linecap="round"/></svg>
+              <span class="step-num">5</span>
+            </div>
+            <div class="step-body">
+              <strong>Deploying to Vercel</strong>
+              <span>Waiting for the build to complete and go live</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="error-panel" class="error-panel" hidden>
+          <p class="error-title">Something went wrong</p>
+          <p id="error-message" class="error-message"></p>
+          <button id="retry-btn" type="button" class="ghost-btn">Try again</button>
+        </div>
+      </main>
+    </div>
+
+    <!-- ============ RESULT VIEW ============ -->
+    <div id="result-view" class="view" hidden>
+      <main class="shell shell--narrow">
+        <div class="result-card">
+          <div class="result-icon" aria-hidden="true">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="40" cy="40" r="36" stroke="currentColor" stroke-width="4"/>
+              <path d="M24 42l10 10 22-24" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h2>Your demo site is live!</h2>
+          <p class="result-sub">The site has been deployed and is ready to share with your customer.</p>
+
+          <div class="result-url-box">
+            <a id="result-link" href="#" target="_blank" rel="noopener noreferrer" class="result-url"></a>
+            <button id="copy-url-btn" class="copy-btn" type="button" aria-label="Copy URL">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path d="M8 3a1 1 0 000 2h2a1 1 0 000-2H8z"/><path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"/></svg>
+              <span id="copy-btn-text">Copy</span>
+            </button>
+          </div>
+
+          <div class="result-actions">
+            <a id="open-site-btn" href="#" target="_blank" rel="noopener noreferrer" class="primary-btn">
+              Open Site
+              <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"/><path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"/></svg>
+            </a>
+            <button id="generate-another-btn" type="button" class="ghost-btn">Generate Another</button>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
