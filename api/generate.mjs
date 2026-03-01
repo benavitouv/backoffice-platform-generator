@@ -15,13 +15,33 @@ const GITHUB_OWNER = process.env.GITHUB_OWNER || '';
 const VERCEL_TOKEN = process.env.VERCEL_TOKEN || '';
 const VERCEL_TEAM_ID = process.env.VERCEL_TEAM_ID || '';
 
-// Template env vars to inject into new Vercel projects
-const TEMPLATE_WEBHOOK_URL = process.env.TEMPLATE_WEBHOOK_URL || '';
-const TEMPLATE_WEBHOOK_SECRET = process.env.TEMPLATE_WEBHOOK_SECRET || '';
-const TEMPLATE_STORAGE_URL = process.env.TEMPLATE_STORAGE_URL || '';
-const TEMPLATE_STORAGE_API_KEY = process.env.TEMPLATE_STORAGE_API_KEY || '';
-const TEMPLATE_TASK_TYPE = process.env.TEMPLATE_TASK_TYPE || 'process_application';
-const TEMPLATE_TRIGGER_ID = process.env.TEMPLATE_TRIGGER_ID || '';
+// Per-template env vars to inject into new Vercel projects
+const TEMPLATE_VARS = {
+  form17: {
+    WEBHOOK_URL:     process.env.FORM17_WEBHOOK_URL     || '',
+    WEBHOOK_SECRET:  process.env.FORM17_WEBHOOK_SECRET  || '',
+    STORAGE_URL:     process.env.FORM17_STORAGE_URL     || '',
+    STORAGE_API_KEY: process.env.FORM17_STORAGE_API_KEY || '',
+    TASK_TYPE:       process.env.FORM17_TASK_TYPE       || 'process_application',
+    TRIGGER_ID:      process.env.FORM17_TRIGGER_ID      || '',
+  },
+  insurance: {
+    WEBHOOK_URL:     process.env.INSURANCE_WEBHOOK_URL     || '',
+    WEBHOOK_SECRET:  process.env.INSURANCE_WEBHOOK_SECRET  || '',
+    STORAGE_URL:     process.env.INSURANCE_STORAGE_URL     || '',
+    STORAGE_API_KEY: process.env.INSURANCE_STORAGE_API_KEY || '',
+    TASK_TYPE:       process.env.INSURANCE_TASK_TYPE       || 'process_application',
+    TRIGGER_ID:      process.env.INSURANCE_TRIGGER_ID      || '',
+  },
+  loan: {
+    WEBHOOK_URL:     process.env.LOAN_WEBHOOK_URL     || '',
+    WEBHOOK_SECRET:  process.env.LOAN_WEBHOOK_SECRET  || '',
+    STORAGE_URL:     process.env.LOAN_STORAGE_URL     || '',
+    STORAGE_API_KEY: process.env.LOAN_STORAGE_API_KEY || '',
+    TASK_TYPE:       process.env.LOAN_TASK_TYPE       || 'process_application',
+    TRIGGER_ID:      process.env.LOAN_TRIGGER_ID      || '',
+  },
+};
 
 // ── Helpers ──
 const readFormData = async (req) => {
@@ -468,14 +488,14 @@ const createVercelProjectWithName = async (projectName, repoFullName) => {
   return { projectId: data.id, projectName: data.name };
 };
 
-const addVercelEnvVars = async (projectId) => {
+const addVercelEnvVars = async (projectId, templateVars) => {
   const envVars = [
-    { key: 'WEBHOOK_URL', value: TEMPLATE_WEBHOOK_URL },
-    { key: 'WEBHOOK_SECRET', value: TEMPLATE_WEBHOOK_SECRET },
-    { key: 'STORAGE_URL', value: TEMPLATE_STORAGE_URL },
-    { key: 'STORAGE_API_KEY', value: TEMPLATE_STORAGE_API_KEY },
-    { key: 'TASK_TYPE', value: TEMPLATE_TASK_TYPE },
-    { key: 'TRIGGER_ID', value: TEMPLATE_TRIGGER_ID },
+    { key: 'WEBHOOK_URL',     value: templateVars.WEBHOOK_URL },
+    { key: 'WEBHOOK_SECRET',  value: templateVars.WEBHOOK_SECRET },
+    { key: 'STORAGE_URL',     value: templateVars.STORAGE_URL },
+    { key: 'STORAGE_API_KEY', value: templateVars.STORAGE_API_KEY },
+    { key: 'TASK_TYPE',       value: templateVars.TASK_TYPE },
+    { key: 'TRIGGER_ID',      value: templateVars.TRIGGER_ID },
   ].filter(({ value }) => value); // only add if value is set
 
   for (const { key, value } of envVars) {
@@ -643,7 +663,7 @@ export default async function handler(req, res) {
     const { projectId, projectName } = await createVercelProject(repoName, repoFullName);
 
     // Add env vars (non-blocking for the stream)
-    addVercelEnvVars(projectId).catch(err => {
+    addVercelEnvVars(projectId, TEMPLATE_VARS[templateId]).catch(err => {
       console.warn('Non-fatal: env vars push failed:', err.message);
     });
 
