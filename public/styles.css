@@ -14,8 +14,13 @@
   color-scheme: light;
 }
 
-* {
+*,
+[hidden] {
   box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 body {
