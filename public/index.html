@@ -138,7 +138,7 @@
               <p class="field-error" id="name-error" aria-live="polite"></p>
             </label>
 
-            <label class="field">
+            <div class="field">
               <span class="field-label">Customer Logo</span>
               <div id="logo-drop-zone" class="logo-drop-zone" tabindex="0" role="button" aria-label="Upload logo file">
                 <input
@@ -166,60 +166,44 @@
                 </div>
               </div>
               <p class="field-error" id="logo-error" aria-live="polite"></p>
-            </label>
+            </div>
 
             <label class="field">
               <span class="field-label">Target Language</span>
-              <div class="lang-select" id="lang-select" role="combobox" aria-expanded="false" aria-haspopup="listbox">
-                <input
-                  id="language-input"
-                  type="text"
-                  name="language"
-                  placeholder="Search languages..."
-                  autocomplete="off"
-                  data-lpignore="true"
-                  aria-autocomplete="list"
-                  aria-controls="lang-listbox"
-                  required
-                />
-                <button type="button" id="lang-arrow" class="lang-arrow" tabindex="-1" aria-label="Open language list">
-                  <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 8 10 12 6"/></svg>
-                </button>
-                <ul id="lang-listbox" class="lang-listbox" role="listbox" aria-label="Languages" hidden>
-                  <li role="option" class="lang-option" data-value="English">English</li>
-                  <li role="option" class="lang-option" data-value="Hebrew">Hebrew</li>
-                  <li role="option" class="lang-option" data-value="Arabic">Arabic</li>
-                  <li role="option" class="lang-option" data-value="French">French</li>
-                  <li role="option" class="lang-option" data-value="Spanish">Spanish</li>
-                  <li role="option" class="lang-option" data-value="German">German</li>
-                  <li role="option" class="lang-option" data-value="Portuguese">Portuguese</li>
-                  <li role="option" class="lang-option" data-value="Italian">Italian</li>
-                  <li role="option" class="lang-option" data-value="Russian">Russian</li>
-                  <li role="option" class="lang-option" data-value="Japanese">Japanese</li>
-                  <li role="option" class="lang-option" data-value="Chinese (Simplified)">Chinese (Simplified)</li>
-                  <li role="option" class="lang-option" data-value="Chinese (Traditional)">Chinese (Traditional)</li>
-                  <li role="option" class="lang-option" data-value="Korean">Korean</li>
-                  <li role="option" class="lang-option" data-value="Turkish">Turkish</li>
-                  <li role="option" class="lang-option" data-value="Dutch">Dutch</li>
-                  <li role="option" class="lang-option" data-value="Polish">Polish</li>
-                  <li role="option" class="lang-option" data-value="Swedish">Swedish</li>
-                  <li role="option" class="lang-option" data-value="Norwegian">Norwegian</li>
-                  <li role="option" class="lang-option" data-value="Danish">Danish</li>
-                  <li role="option" class="lang-option" data-value="Finnish">Finnish</li>
-                  <li role="option" class="lang-option" data-value="Greek">Greek</li>
-                  <li role="option" class="lang-option" data-value="Hindi">Hindi</li>
-                  <li role="option" class="lang-option" data-value="Bengali">Bengali</li>
-                  <li role="option" class="lang-option" data-value="Urdu">Urdu</li>
-                  <li role="option" class="lang-option" data-value="Persian">Persian</li>
-                  <li role="option" class="lang-option" data-value="Thai">Thai</li>
-                  <li role="option" class="lang-option" data-value="Vietnamese">Vietnamese</li>
-                  <li role="option" class="lang-option" data-value="Indonesian">Indonesian</li>
-                  <li role="option" class="lang-option" data-value="Romanian">Romanian</li>
-                  <li role="option" class="lang-option" data-value="Hungarian">Hungarian</li>
-                  <li role="option" class="lang-option" data-value="Czech">Czech</li>
-                  <li role="option" class="lang-option" data-value="Ukrainian">Ukrainian</li>
-                </ul>
-              </div>
+              <select id="language-input" name="language" class="language-select">
+                <option value="English" selected>English</option>
+                <option value="Hebrew">Hebrew</option>
+                <option value="Arabic">Arabic</option>
+                <option value="French">French</option>
+                <option value="Spanish">Spanish</option>
+                <option value="German">German</option>
+                <option value="Portuguese">Portuguese</option>
+                <option value="Italian">Italian</option>
+                <option value="Russian">Russian</option>
+                <option value="Japanese">Japanese</option>
+                <option value="Chinese (Simplified)">Chinese (Simplified)</option>
+                <option value="Chinese (Traditional)">Chinese (Traditional)</option>
+                <option value="Korean">Korean</option>
+                <option value="Turkish">Turkish</option>
+                <option value="Dutch">Dutch</option>
+                <option value="Polish">Polish</option>
+                <option value="Swedish">Swedish</option>
+                <option value="Norwegian">Norwegian</option>
+                <option value="Danish">Danish</option>
+                <option value="Finnish">Finnish</option>
+                <option value="Greek">Greek</option>
+                <option value="Hindi">Hindi</option>
+                <option value="Bengali">Bengali</option>
+                <option value="Urdu">Urdu</option>
+                <option value="Persian">Persian</option>
+                <option value="Thai">Thai</option>
+                <option value="Vietnamese">Vietnamese</option>
+                <option value="Indonesian">Indonesian</option>
+                <option value="Romanian">Romanian</option>
+                <option value="Hungarian">Hungarian</option>
+                <option value="Czech">Czech</option>
+                <option value="Ukrainian">Ukrainian</option>
+              </select>
               <p class="field-error" id="language-error" aria-live="polite"></p>
             </label>
 

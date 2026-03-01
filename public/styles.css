@@ -346,98 +346,24 @@ body {
   color: #dc2626;
 }
 
-/* ── Language custom select ── */
-.lang-select {
-  position: relative;
-}
-
-.lang-select input[type="text"] {
+/* ── Language select ── */
+.language-select {
   width: 100%;
-  padding: 13px 48px 13px 16px;
+  padding: 13px 16px;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: #ffffff;
   font-size: 1rem;
   color: var(--ink);
   font-family: inherit;
+  cursor: pointer;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  cursor: default;
 }
 
-.lang-select input[type="text"]:focus {
+.language-select:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 4px var(--accent-soft);
-  cursor: text;
-}
-
-.lang-arrow {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: none;
-  color: var(--muted);
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  border-radius: 8px;
-  padding: 0;
-  transition: color 0.15s ease;
-}
-
-.lang-arrow:hover {
-  color: var(--ink);
-}
-
-.lang-arrow svg {
-  width: 16px;
-  height: 16px;
-  transition: transform 0.2s ease;
-}
-
-.lang-select[aria-expanded="true"] .lang-arrow svg {
-  transform: rotate(180deg);
-}
-
-.lang-listbox {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.12);
-  list-style: none;
-  margin: 0;
-  padding: 4px;
-  max-height: 240px;
-  overflow-y: auto;
-  z-index: 100;
-}
-
-.lang-option {
-  padding: 10px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  color: var(--ink);
-  transition: background 0.1s ease;
-}
-
-.lang-option:hover,
-.lang-option.is-active {
-  background: var(--bg);
-}
-
-.lang-option.is-selected {
-  background: var(--accent-soft);
-  color: var(--accent-dark);
-  font-weight: 500;
 }
 
 /* ── Errors ── */
