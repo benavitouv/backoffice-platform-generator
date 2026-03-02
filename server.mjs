@@ -60,6 +60,18 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  // Route /api/history
+  if (req.method === 'GET' && url.pathname === '/api/history') {
+    try {
+      const { default: handler } = await import('./api/history.mjs');
+      await handler(req, res);
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    }
+    return;
+  }
+
   // Route /api/health
   if (req.method === 'GET' && url.pathname === '/api/health') {
     res.writeHead(200, { 'Content-Type': 'application/json' });

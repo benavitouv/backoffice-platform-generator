@@ -3,6 +3,7 @@
   "builds": [
     { "src": "api/generate.mjs", "use": "@vercel/node", "config": { "maxDuration": 300 } },
     { "src": "api/health.mjs", "use": "@vercel/node" },
+    { "src": "api/history.mjs", "use": "@vercel/node" },
     { "src": "public/**", "use": "@vercel/static" }
   ],
   "routes": [

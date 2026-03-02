@@ -15,6 +15,7 @@ const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
 const GITHUB_OWNER = process.env.GITHUB_OWNER || '';
 const VERCEL_TOKEN = process.env.VERCEL_TOKEN || '';
 const VERCEL_TEAM_ID = process.env.VERCEL_TEAM_ID || '';
+const PLATFORM_REPO = process.env.PLATFORM_REPO || 'backoffice-platform-generator';
 
 // Per-template env vars to inject into new Vercel projects
 const TEMPLATE_VARS = {
@@ -192,6 +193,9 @@ INSTRUCTIONS:
      * "An unexpected error occurred." → translated
    - Keep all function names, variable names, DOM selectors, and logic UNCHANGED
    - Only change the string literals that are user-visible text
+
+   index.html — agent activity link:
+   - The success modal contains <a class="agent-activity-link">. Translate its visible text to ${language}, but NEVER modify its href, target, rel, or class attributes.
 
 IMPORTANT RULES:
 - Return ONLY valid JSON, no markdown, no code fences, no explanation
@@ -783,6 +787,46 @@ const waitForDeployment = async (projectId, projectName, sendLog, deploymentId =
   return `https://${projectName}.vercel.app`;
 };
 
+// ── History ──
+const appendToHistory = async ({ customerName, templateId, language, url, repoFullName, timestamp }) => {
+  if (!GITHUB_TOKEN || !GITHUB_OWNER || !PLATFORM_REPO) return;
+
+  const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${PLATFORM_REPO}/contents/history.json`;
+
+  let currentEntries = [];
+  let currentSha = null;
+
+  const fetchRes = await fetch(apiUrl, { headers: githubHeaders() });
+  if (fetchRes.ok) {
+    const data = await fetchRes.json();
+    currentSha = data.sha;
+    try {
+      currentEntries = JSON.parse(Buffer.from(data.content, 'base64').toString('utf-8'));
+    } catch { currentEntries = []; }
+  } else if (fetchRes.status !== 404) {
+    throw new Error(`Failed to fetch history (${fetchRes.status})`);
+  }
+
+  const newEntry = { id: String(Date.now()), customerName, templateId, language, url, repoFullName, timestamp };
+  const newEntries = [newEntry, ...currentEntries].slice(0, 200);
+  const content = Buffer.from(JSON.stringify(newEntries, null, 2)).toString('base64');
+
+  const updateRes = await fetch(apiUrl, {
+    method: 'PUT',
+    headers: githubHeaders(),
+    body: JSON.stringify({
+      message: `chore: record deployment for ${customerName}`,
+      content,
+      ...(currentSha ? { sha: currentSha } : {}),
+    }),
+  });
+
+  if (!updateRes.ok) {
+    const text = await updateRes.text();
+    throw new Error(`Failed to save history (${updateRes.status}): ${text}`);
+  }
+};
+
 // ── SSE helpers ──
 const sendSSE = (res, data) => {
   res.write(`data: ${JSON.stringify(data)}\n\n`);
@@ -1016,6 +1060,17 @@ export default async function handler(req, res) {
 
     // ── Done ──
     sendSSE(res, { done: true, url: liveUrl });
+
+    // Non-blocking — record deployment in history
+    appendToHistory({
+      customerName,
+      templateId,
+      language,
+      url: liveUrl,
+      repoFullName,
+      timestamp: new Date().toISOString(),
+    }).catch(err => console.warn('Non-fatal: history save failed:', err.message));
+
     res.end();
 
   } catch (err) {
