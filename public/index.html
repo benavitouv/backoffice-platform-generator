@@ -144,6 +144,32 @@
               </div>
             </button>
 
+            <button class="template-card" data-template="custom" type="button" aria-pressed="false">
+              <div class="card-preview">
+                <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                  <!-- Dashed header placeholder -->
+                  <rect x="8" y="8" width="42" height="28" rx="5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 2" opacity="0.5"/>
+                  <rect x="58" y="12" width="90" height="9" rx="3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 2" opacity="0.4"/>
+                  <!-- Dashed form card -->
+                  <rect x="8" y="44" width="184" height="86" rx="8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="5 3"/>
+                  <!-- Dashed field placeholders -->
+                  <rect x="16" y="54" width="80" height="13" rx="4" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 2" opacity="0.5"/>
+                  <rect x="104" y="54" width="80" height="13" rx="4" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 2" opacity="0.5"/>
+                  <rect x="16" y="73" width="168" height="13" rx="4" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 2" opacity="0.5"/>
+                  <!-- Plus / build icon in centre -->
+                  <circle cx="100" cy="108" r="11" fill="currentColor" opacity="0.1"/>
+                  <path d="M100 102v12M94 108h12" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
+                </svg>
+              </div>
+              <div class="card-info">
+                <strong>Custom</strong>
+                <span>Describe your own form fields and agent configuration</span>
+              </div>
+              <div class="card-check" aria-hidden="true">
+                <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.5"/><path d="M5 8.5l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </button>
+
           </div>
           <p id="template-error" class="field-error" aria-live="polite"></p>
         </section>
@@ -235,6 +261,65 @@
               </select>
               <p class="field-error" id="language-error" aria-live="polite"></p>
             </label>
+
+            <!-- Custom template configuration — shown only when Custom is selected -->
+            <div id="custom-config" class="custom-config">
+              <div class="custom-config-divider"><span>Website Configuration</span></div>
+
+              <label class="field">
+                <span class="field-label">Website Description</span>
+                <textarea id="website-description" name="websiteDescription" class="field-textarea" rows="3"
+                  placeholder="Describe what this website does, who uses it, and what they submit. e.g. &quot;A mortgage application portal where customers submit personal details and income documents.&quot;"></textarea>
+                <p class="field-error" id="desc-error" aria-live="polite"></p>
+              </label>
+
+              <label class="field">
+                <span class="field-label">Form Fields</span>
+                <span class="field-hint">One field per line — format: <code>Label | type</code><br>
+                  Types: <code>text</code>, <code>email</code>, <code>tel</code>, <code>number</code>, <code>date</code>, <code>textarea</code>, <code>file</code>, <code>dropdown: Option A, Option B</code></span>
+                <textarea id="fields-spec" name="fieldsSpec" class="field-textarea field-textarea--mono" rows="5"
+                  placeholder="Full Name | text&#10;Email Address | email&#10;Phone | tel&#10;Bank | dropdown: Bank A, Bank B, Bank C&#10;Document | file"></textarea>
+                <p class="field-error" id="fields-error" aria-live="polite"></p>
+              </label>
+
+              <div class="custom-config-divider"><span>Agent Configuration</span></div>
+
+              <div class="agent-config">
+                <label class="field">
+                  <span class="field-label">Webhook URL <span class="field-required">*</span></span>
+                  <input id="webhook-url" type="url" name="webhookUrl"
+                    placeholder="https://api.demo.wonderful.ai/api/v1/tasks/webhook/…" />
+                  <p class="field-error" id="webhook-error" aria-live="polite"></p>
+                </label>
+
+                <label class="field">
+                  <span class="field-label">Webhook Secret <span class="field-required">*</span></span>
+                  <input id="webhook-secret" type="password" name="webhookSecret"
+                    placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" autocomplete="new-password" />
+                  <p class="field-error" id="webhook-secret-error" aria-live="polite"></p>
+                </label>
+
+                <div class="agent-config-row">
+                  <label class="field">
+                    <span class="field-label">Platform Base URL</span>
+                    <input id="env-base-url" type="url" name="envBaseUrl"
+                      value="https://wonderful.app.demo.wonderful.ai" />
+                  </label>
+
+                  <label class="field">
+                    <span class="field-label">Storage URL</span>
+                    <input id="storage-url" type="url" name="storageUrl"
+                      value="https://api.demo.wonderful.ai/api/v1/storage" />
+                  </label>
+                </div>
+
+                <label class="field">
+                  <span class="field-label">Storage API Key</span>
+                  <input id="storage-api-key" type="password" name="storageApiKey"
+                    placeholder="f2440f3… (leave blank to use default)" autocomplete="new-password" />
+                </label>
+              </div>
+            </div>
 
             <button id="generate-btn" class="generate-btn" type="submit">
               <span>Generate Demo Site</span>

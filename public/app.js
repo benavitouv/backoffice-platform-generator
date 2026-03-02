@@ -27,6 +27,19 @@ const logoError = document.querySelector('#logo-error');
 const languageInput = document.querySelector('#language-input');
 const languageError = document.querySelector('#language-error');
 
+const customConfig = document.querySelector('#custom-config');
+const websiteDescInput = document.querySelector('#website-description');
+const fieldsSpecInput = document.querySelector('#fields-spec');
+const envBaseUrlInput = document.querySelector('#env-base-url');
+const webhookUrlInput = document.querySelector('#webhook-url');
+const webhookSecretInput = document.querySelector('#webhook-secret');
+const storageUrlInput = document.querySelector('#storage-url');
+const storageApiKeyInput = document.querySelector('#storage-api-key');
+const descError = document.querySelector('#desc-error');
+const fieldsError = document.querySelector('#fields-error');
+const webhookError = document.querySelector('#webhook-error');
+const webhookSecretError = document.querySelector('#webhook-secret-error');
+
 const steps = document.querySelectorAll('.step');
 const logList = document.querySelector('#log-list');
 const errorPanel = document.querySelector('#error-panel');
@@ -63,6 +76,11 @@ templateCards.forEach((card) => {
     card.setAttribute('aria-pressed', 'true');
     selectedTemplate = card.dataset.template;
     templateError.textContent = '';
+    if (selectedTemplate === 'custom') {
+      customConfig.classList.add('is-visible');
+    } else {
+      customConfig.classList.remove('is-visible');
+    }
   });
 });
 
@@ -172,6 +190,36 @@ const validate = () => {
     languageError.textContent = '';
   }
 
+  if (selectedTemplate === 'custom') {
+    if (!websiteDescInput.value.trim()) {
+      descError.textContent = 'Website description is required.';
+      valid = false;
+    } else {
+      descError.textContent = '';
+    }
+
+    if (!fieldsSpecInput.value.trim()) {
+      fieldsError.textContent = 'Form fields specification is required.';
+      valid = false;
+    } else {
+      fieldsError.textContent = '';
+    }
+
+    if (!webhookUrlInput.value.trim()) {
+      webhookError.textContent = 'Webhook URL is required.';
+      valid = false;
+    } else {
+      webhookError.textContent = '';
+    }
+
+    if (!webhookSecretInput.value.trim()) {
+      webhookSecretError.textContent = 'Webhook secret is required.';
+      valid = false;
+    } else {
+      webhookSecretError.textContent = '';
+    }
+  }
+
   return valid;
 };
 
@@ -271,6 +319,16 @@ generatorForm.addEventListener('submit', async (e) => {
   formData.append('customerName', customerNameInput.value.trim());
   formData.append('language', languageInput.value.trim());
   formData.append('logo', logoFile, logoFile.name);
+
+  if (selectedTemplate === 'custom') {
+    formData.append('websiteDescription', websiteDescInput.value.trim());
+    formData.append('fieldsSpec', fieldsSpecInput.value.trim());
+    formData.append('envBaseUrl', envBaseUrlInput.value.trim());
+    formData.append('webhookUrl', webhookUrlInput.value.trim());
+    formData.append('webhookSecret', webhookSecretInput.value.trim());
+    formData.append('storageUrl', storageUrlInput.value.trim());
+    formData.append('storageApiKey', storageApiKeyInput.value.trim());
+  }
 
   abortController = new AbortController();
 

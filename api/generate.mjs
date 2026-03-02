@@ -87,6 +87,7 @@ const slugifyRepoName = (customerName, templateId) => {
   const suffix = templateId === 'form17' ? 'health'
     : templateId === 'insurance' ? 'insurance'
     : templateId === 'provident' ? 'provident'
+    : templateId === 'custom' ? 'demo'
     : 'loan';
   return `${slug}-${suffix}-demo`.replace(/^-|-$/g, '');
 };
@@ -284,6 +285,190 @@ ${appJs}
 
   if (!parsed.files || !parsed.brand) {
     throw new Error('Claude response missing expected fields (files or brand)');
+  }
+
+  return parsed;
+};
+
+// ── Claude API call (custom template — generates site from scratch) ──
+const callClaudeCustom = async ({ customerName, language, logoBase64, logoMime, logoExt, indexHtml, stylesCss, appJs, submitMjsRef, customFields }) => {
+  const { websiteDescription, fieldsSpec, envBaseUrl } = customFields;
+  const isRTL = ['Hebrew', 'Arabic', 'Urdu', 'Persian', 'Farsi'].includes(language);
+
+  const rtlChatBlock = `
+/* Force RTL layout for the Wonderful chat widget */
+.wonderful-chat-window,
+.wonderful-chat-button {
+  direction: rtl !important;
+}
+.wonderful-chat-button {
+  flex-direction: row-reverse !important;
+}
+.wonderful-chat-header,
+.wonderful-chat-agent-info,
+.wonderful-chat-footer {
+  flex-direction: row-reverse !important;
+}
+.wonderful-chat-title {
+  align-items: flex-end !important;
+  text-align: right !important;
+}
+.wonderful-chat-messages,
+.wonderful-message,
+.wonderful-chat-footer input {
+  text-align: right !important;
+  unicode-bidi: plaintext;
+  direction: rtl !important;
+}`;
+
+  const prompt = `You are building a fully custom web portal for a customer. Based on the logo, description, and field specification, generate a complete, working website.
+
+CUSTOMER: ${customerName}
+LANGUAGE: ${language}
+LOGO FILE: logo${logoExt}
+PLATFORM BASE URL: ${envBaseUrl}
+
+WEBSITE PURPOSE:
+${websiteDescription}
+
+FORM FIELDS SPECIFICATION (format: "Label | type"):
+${fieldsSpec}
+
+Field types reference:
+- text: single-line text input
+- email: email address input
+- tel: phone number input
+- number: numeric input
+- date: date picker
+- textarea: multi-line text area
+- file: document upload (renders a drag-and-drop zone, max 4MB, uses /api/upload + /api/submit two-step flow)
+- dropdown: <select> with options listed after colon, e.g. "Bank | dropdown: Bank A, Bank B, Bank C"
+- checkbox: single checkbox (boolean)
+
+GENERATE THESE 4 FILES:
+
+1. index.html — Complete HTML page:
+   - <html lang="${isRTL ? 'he' : 'en'}" dir="${isRTL ? 'rtl' : 'ltr'}">
+   - <title>${customerName} – [appropriate page title in ${language}]</title>
+   - Header with logo (src="logo${logoExt}", alt="${customerName} Logo")
+   - A form (#claim-form) with ALL specified fields rendered as proper inputs/selects/textareas
+   - For "file" fields: include a drag-and-drop zone (#drop-zone) exactly as in the reference template
+   - Success modal (#success-modal) with a close button (#success-close)
+   - Wonderful chat widget configured with brand colors and all strings in ${language}, isRTL: ${isRTL}
+   - Chat widget script src: replace the base domain in the reference template's script src with "${envBaseUrl}"
+   - All visible text translated to ${language}
+   ${isRTL ? '- Text direction is RTL — ensure all content flows correctly' : ''}
+
+2. styles.css — Complete CSS:
+   - Extract dominant brand color from logo → set --accent, --accent-dark, --accent-warm, --accent-rgb
+   - Adapt the reference CSS for the new form layout
+   ${isRTL ? `- Add this RTL chat widget CSS block at the end:\n${rtlChatBlock}` : '- Do NOT add any RTL CSS'}
+
+3. app.js — Client JavaScript:
+   - Form validation for all generated fields
+   - If the form has file fields: use the two-step upload flow (POST file to /api/upload → get attachmentId → POST form + attachment_id to /api/submit)
+   - If no file fields: POST form directly to /api/submit (no /api/upload call needed)
+   - Success modal show/hide (same pattern as reference)
+   - Keep all DOM selectors and function patterns matching the HTML above
+
+4. api/submit.mjs — Vercel serverless handler:
+   - export const config = { api: { bodyParser: false } }
+   - Read ALL form fields by name from FormData
+   - Accept pre-uploaded attachment_id for file fields
+   - Build webhook payload: { trigger_id: '', task_type: 'process_application', payload: { ...all field values... } }
+   - POST to process.env.WEBHOOK_URL with header 'x-webhook-secret': process.env.WEBHOOK_SECRET
+   - Return JSON { ok: true } on success, { ok: false, message } on error
+   - Use same error handling and helper patterns as reference
+
+IMPORTANT RULES:
+- Return ONLY valid JSON, no markdown, no code fences, no explanation
+- Preserve HTML structure patterns from the reference (same CSS classes, same JS patterns)
+- Do not add fields that are not in the spec; do not skip any fields that are in the spec
+- HTML form field name attributes must be snake_case versions of the labels
+
+REFERENCE FILES (use for structure and patterns — heavily modify content to match description and fields):
+
+=== index.html ===
+${indexHtml}
+=== END index.html ===
+
+=== styles.css ===
+${stylesCss}
+=== END styles.css ===
+
+=== app.js ===
+${appJs}
+=== END app.js ===
+
+=== api/submit.mjs (reference pattern) ===
+${submitMjsRef}
+=== END api/submit.mjs ===
+
+Return this exact JSON structure:
+{
+  "brand": {
+    "accent": "#hexcode",
+    "accentDark": "#hexcode",
+    "accentWarm": "#hexcode",
+    "accentRgb": "R G B"
+  },
+  "files": {
+    "index.html": "<complete file content>",
+    "styles.css": "<complete file content>",
+    "app.js": "<complete file content>",
+    "api/submit.mjs": "<complete file content>"
+  }
+}`;
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'x-api-key': ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 24000,
+      system: 'You are a full-stack web developer and brand designer. You build complete, working web portals from scratch based on specifications. You ALWAYS return valid JSON only — no markdown, no code blocks, no explanations.',
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'image',
+              source: { type: 'base64', media_type: logoMime, data: logoBase64 },
+            },
+            { type: 'text', text: prompt },
+          ],
+        },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Claude API error (${response.status}): ${text}`);
+  }
+
+  const result = await response.json();
+  const rawText = result.content?.[0]?.text || '';
+
+  const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error('Claude returned invalid response (no JSON found)');
+
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch (e) {
+    throw new Error(`Failed to parse Claude response as JSON: ${e.message}`);
+  }
+
+  if (!parsed.files || !parsed.brand) {
+    throw new Error('Claude response missing expected fields (files or brand)');
+  }
+  if (!parsed.files['api/submit.mjs']) {
+    throw new Error('Claude response missing api/submit.mjs for custom template');
   }
 
   return parsed;
@@ -500,15 +685,10 @@ const createVercelProjectWithName = async (projectName, repoFullName) => {
   return { projectId: data.id, projectName: data.name };
 };
 
-const addVercelEnvVars = async (projectId, templateVars) => {
-  const envVars = [
-    { key: 'WEBHOOK_URL',     value: templateVars.WEBHOOK_URL },
-    { key: 'WEBHOOK_SECRET',  value: templateVars.WEBHOOK_SECRET },
-    { key: 'STORAGE_URL',     value: templateVars.STORAGE_URL },
-    { key: 'STORAGE_API_KEY', value: templateVars.STORAGE_API_KEY },
-    { key: 'TASK_TYPE',       value: templateVars.TASK_TYPE },
-    { key: 'TRIGGER_ID',      value: templateVars.TRIGGER_ID },
-  ].filter(({ value }) => value); // only add if value is set
+const addVercelEnvVars = async (projectId, envVarMap) => {
+  const envVars = Object.entries(envVarMap)
+    .map(([key, value]) => ({ key, value }))
+    .filter(({ value }) => value); // only add if value is set
 
   for (const { key, value } of envVars) {
     const res = await fetch(vercelApiUrl(`/v10/projects/${projectId}/env`), {
@@ -644,11 +824,31 @@ export default async function handler(req, res) {
       return;
     }
 
-    const validTemplates = ['form17', 'insurance', 'loan', 'provident'];
+    const validTemplates = ['form17', 'insurance', 'loan', 'provident', 'custom'];
     if (!validTemplates.includes(templateId)) {
       sendSSE(res, { error: true, message: `Invalid templateId. Must be one of: ${validTemplates.join(', ')}` });
       res.end();
       return;
+    }
+
+    // ── Custom template extra fields ──
+    let customFields = null;
+    if (templateId === 'custom') {
+      const websiteDescription = String(formData.get('websiteDescription') || '').trim();
+      const fieldsSpec = String(formData.get('fieldsSpec') || '').trim();
+      const envBaseUrl = String(formData.get('envBaseUrl') || 'https://wonderful.app.demo.wonderful.ai').trim();
+      const webhookUrl = String(formData.get('webhookUrl') || '').trim();
+      const webhookSecret = String(formData.get('webhookSecret') || '').trim();
+      const storageUrl = String(formData.get('storageUrl') || 'https://api.demo.wonderful.ai/api/v1/storage').trim();
+      const storageApiKey = String(formData.get('storageApiKey') || 'f2440f35-f26d-4145-8c15-295b40987ed6').trim();
+
+      if (!webhookUrl || !webhookSecret) {
+        sendSSE(res, { error: true, message: 'Webhook URL and Webhook Secret are required for custom template.' });
+        res.end();
+        return;
+      }
+
+      customFields = { websiteDescription, fieldsSpec, envBaseUrl, webhookUrl, webhookSecret, storageUrl, storageApiKey };
     }
 
     // ── Read logo ──
@@ -660,7 +860,8 @@ export default async function handler(req, res) {
     sendLog(`Starting generation for "${customerName}" — ${templateId} template, ${language}`);
 
     // ── Read English base template files ──
-    const templateDir = join(__dirname, '..', 'templates', templateId);
+    // Custom template uses the loan template as a structural base for Claude reference
+    const templateDir = join(__dirname, '..', 'templates', templateId === 'custom' ? 'loan' : templateId);
     // Some templates store frontend files under public/, others at the root
     const frontendDir = await (async () => {
       try {
@@ -689,10 +890,16 @@ export default async function handler(req, res) {
 
     // ── Step 1: Claude customization ──
     sendSSE(res, { step: 1, status: 'loading' });
-    sendLog(`Sending logo (${(logoBuffer.length / 1024).toFixed(0)} KB) + 3 template files to Claude...`);
+    sendLog(`Sending logo (${(logoBuffer.length / 1024).toFixed(0)} KB) + ${templateId === 'custom' ? '4 reference files' : '3 template files'} to Claude...`);
 
     // Send heartbeat messages every 12s while Claude is working
-    const heartbeatMsgs = [
+    const heartbeatMsgs = templateId === 'custom' ? [
+      'Analyzing logo image and brand colors...',
+      'Generating custom form layout from spec...',
+      'Building submission handler for your fields...',
+      'Applying brand theme and translations...',
+      'Almost ready...',
+    ] : [
       'Analyzing logo image and brand colors...',
       'Extracting dominant color palette...',
       'Generating translated interface text...',
@@ -707,17 +914,9 @@ export default async function handler(req, res) {
     const claudeStart = Date.now();
     let claudeResult;
     try {
-      claudeResult = await callClaude({
-        customerName,
-        language,
-        templateId,
-        logoBase64,
-        logoMime,
-        logoExt,
-        indexHtml,
-        stylesCss,
-        appJs,
-      });
+      claudeResult = templateId === 'custom'
+        ? await callClaudeCustom({ customerName, language, logoBase64, logoMime, logoExt, indexHtml, stylesCss, appJs, submitMjsRef: submitMjs, customFields })
+        : await callClaude({ customerName, language, templateId, logoBase64, logoMime, logoExt, indexHtml, stylesCss, appJs });
     } finally {
       clearInterval(heartbeat);
     }
@@ -743,7 +942,7 @@ export default async function handler(req, res) {
       'server.mjs': serverMjs,
       'package.json': pkgJson,
       'vercel.json': vercelJson,
-      'api/submit.mjs': submitMjs,
+      'api/submit.mjs': templateId === 'custom' ? (claudeResult.files['api/submit.mjs'] || submitMjs) : submitMjs,
       'api/health.mjs': healthMjs,
       ...(uploadMjs ? { 'api/upload.mjs': uploadMjs } : {}),
     };
@@ -781,9 +980,18 @@ export default async function handler(req, res) {
     sendLog(`Vercel project created (${projectName})`, 'done');
 
     // Add env vars (non-blocking for the stream)
-    const templateVarCount = Object.values(TEMPLATE_VARS[templateId]).filter(Boolean).length;
+    const envVarMap = templateId === 'custom'
+      ? {
+          BASE_URL:        customFields.envBaseUrl,
+          WEBHOOK_URL:     customFields.webhookUrl,
+          WEBHOOK_SECRET:  customFields.webhookSecret,
+          STORAGE_URL:     customFields.storageUrl,
+          STORAGE_API_KEY: customFields.storageApiKey,
+        }
+      : TEMPLATE_VARS[templateId];
+    const templateVarCount = Object.values(envVarMap).filter(Boolean).length;
     sendLog(`Injecting ${templateVarCount} environment variables...`);
-    addVercelEnvVars(projectId, TEMPLATE_VARS[templateId]).catch(err => {
+    addVercelEnvVars(projectId, envVarMap).catch(err => {
       console.warn('Non-fatal: env vars push failed:', err.message);
     });
 

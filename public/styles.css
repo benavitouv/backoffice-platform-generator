@@ -90,7 +90,7 @@ body {
 /* ── Template Cards ── */
 .template-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 12px;
 }
 
@@ -116,6 +116,7 @@ body {
 .template-card[data-template="insurance"] { color: #8b5cf6; }
 .template-card[data-template="loan"]      { color: #374151; }
 .template-card[data-template="provident"] { color: #0d9488; }
+.template-card[data-template="custom"]    { color: #f59e0b; }
 
 .template-card:hover {
   border-color: #d1d5db;
@@ -360,6 +361,125 @@ body {
   font-size: 0.82rem;
   color: #dc2626;
   min-height: 1.1em;
+}
+
+/* ── Input type extensions (url, password) ── */
+.field input[type="url"],
+.field input[type="password"] {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  font-size: 0.95rem;
+  color: var(--ink);
+  font-family: inherit;
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field input[type="url"]:focus,
+.field input[type="password"]:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* ── Textarea field ── */
+.field-textarea {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  font-size: 0.875rem;
+  color: var(--ink);
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.55;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.field-textarea--mono {
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+  font-size: 0.82rem;
+}
+
+.field-hint {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: -2px 0 0;
+}
+
+.field-hint code {
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.75rem;
+  background: #f3f4f6;
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--ink);
+}
+
+.field-required {
+  color: #dc2626;
+  font-size: 0.8rem;
+}
+
+/* ── Custom config section ── */
+.custom-config {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.custom-config.is-visible {
+  display: flex;
+}
+
+.custom-config-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.custom-config-divider::before,
+.custom-config-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.custom-config-divider span {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* ── Agent config box ── */
+.agent-config {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.agent-config-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
 }
 
 /* ── Generate button ── */
@@ -847,13 +967,23 @@ body {
 }
 
 /* ── Responsive ── */
-@media (max-width: 800px) {
+@media (max-width: 960px) {
   .template-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (max-width: 500px) {
+@media (max-width: 680px) {
+  .template-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .agent-config-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 420px) {
   .template-grid {
     grid-template-columns: 1fr;
   }
