@@ -413,16 +413,24 @@ retryBtn.addEventListener('click', () => {
 });
 
 // ── History sidebar ──
-const historyToggle        = document.querySelector('#history-toggle');
-const historySidebar       = document.querySelector('#history-sidebar');
-const historySidebarClose  = document.querySelector('#history-sidebar-close');
+const appSidebar            = document.querySelector('#app-sidebar');
+const sidebarCollapseBtn    = document.querySelector('#sidebar-collapse-btn');
 const historySidebarRefresh = document.querySelector('#history-sidebar-refresh');
-const historyBackdrop      = document.querySelector('#history-backdrop');
-const hsbLoading           = document.querySelector('#hsb-loading');
-const hsbList              = document.querySelector('#hsb-list');
-const hsbEmpty             = document.querySelector('#hsb-empty');
-const hsbError             = document.querySelector('#hsb-error');
-const hsbErrorMsg          = document.querySelector('#hsb-error-msg');
+const hsbLoading            = document.querySelector('#hsb-loading');
+const hsbList               = document.querySelector('#hsb-list');
+const hsbEmpty              = document.querySelector('#hsb-empty');
+const hsbError              = document.querySelector('#hsb-error');
+const hsbErrorMsg           = document.querySelector('#hsb-error-msg');
+
+// Restore persisted collapse state
+if (localStorage.getItem('sidebarCollapsed') === 'true') {
+  appSidebar.classList.add('is-collapsed');
+}
+
+sidebarCollapseBtn.addEventListener('click', () => {
+  appSidebar.classList.toggle('is-collapsed');
+  localStorage.setItem('sidebarCollapsed', appSidebar.classList.contains('is-collapsed') ? 'true' : 'false');
+});
 
 const TEMPLATE_LABELS = {
   form17:    'Health Referral',
@@ -486,26 +494,8 @@ const loadHistorySidebar = async () => {
   }
 };
 
-const openSidebar = () => {
-  historySidebar.classList.add('is-open');
-  historyToggle.setAttribute('aria-expanded', 'true');
-  historySidebar.setAttribute('aria-hidden', 'false');
-  historyBackdrop.removeAttribute('hidden');
-  document.body.style.overflow = 'hidden';
-  loadHistorySidebar();
-};
-
-const closeSidebar = () => {
-  historySidebar.classList.remove('is-open');
-  historyToggle.setAttribute('aria-expanded', 'false');
-  historySidebar.setAttribute('aria-hidden', 'true');
-  historyBackdrop.setAttribute('hidden', '');
-  document.body.style.overflow = '';
-};
-
-historyToggle.addEventListener('click', openSidebar);
-historySidebarClose.addEventListener('click', closeSidebar);
 historySidebarRefresh.addEventListener('click', loadHistorySidebar);
-historyBackdrop.addEventListener('click', closeSidebar);
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSidebar(); });
+
+// Load history on page load
+loadHistorySidebar();
 
