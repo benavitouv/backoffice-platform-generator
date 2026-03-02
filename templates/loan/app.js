@@ -11,6 +11,8 @@ const successClose = document.querySelector('#success-close');
 
 let selectedFile = null;
 
+const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4 MB
+
 const formatBytes = (bytes) => {
   if (!bytes) return '—';
   const units = ['B', 'KB', 'MB', 'GB'];
@@ -96,38 +98,30 @@ form.addEventListener('submit', async (event) => {
     return;
   }
 
+  if (file.size > MAX_FILE_SIZE) {
+    setStatus('error', 'File is too large. Maximum allowed size is 4MB. Please compress the file and try again.');
+    return;
+  }
+
   submitBtn.disabled = true;
   form.classList.add('is-loading');
 
   try {
-    // Step 1: Get presigned upload URL (tiny JSON — no file payload)
-    setStatus('info', 'Preparing upload...');
-    const uploadInitRes = await fetch('/api/upload', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        filename: file.name,
-        contentType: file.type || 'application/octet-stream',
-      }),
-    });
-    const uploadInitData = await uploadInitRes.json().catch(() => ({}));
-    if (!uploadInitRes.ok || !uploadInitData.ok) {
-      throw new Error(uploadInitData?.message || 'Failed to prepare upload.');
-    }
-    const { attachmentId, uploadUrl } = uploadInitData;
-
-    // Step 2: Upload file directly to storage (bypasses Vercel size limit)
+    // Step 1: Upload file via server (server handles storage upload)
     setStatus('info', 'Uploading document...');
-    const putRes = await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': file.type || 'application/octet-stream' },
-      body: file,
+    const uploadFormData = new FormData();
+    uploadFormData.append('file', file);
+    const uploadRes = await fetch('/api/upload', {
+      method: 'POST',
+      body: uploadFormData,
     });
-    if (!putRes.ok) {
-      throw new Error(`Document upload failed (${putRes.status}). Please try again.`);
+    const uploadData = await uploadRes.json().catch(() => ({}));
+    if (!uploadRes.ok || !uploadData.ok) {
+      throw new Error(uploadData?.message || 'Failed to upload document.');
     }
+    const { attachmentId } = uploadData;
 
-    // Step 3: Submit form with attachment ID only (no file)
+    // Step 2: Submit form with attachment ID only (no file)
     setStatus('info', 'Submitting loan application...');
     const formData = new FormData(form);
     formData.delete('claim_file');

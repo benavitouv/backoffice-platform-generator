@@ -94,7 +94,7 @@ form.addEventListener('submit', async (event) => {
   const file = selectedFile || fileInput.files?.[0];
 
   if (!file) {
-    setStatus('error', 'Please attach an insurance request document before submitting.');
+    setStatus('error', 'Please attach an enrollment document before submitting.');
     return;
   }
 
@@ -122,7 +122,7 @@ form.addEventListener('submit', async (event) => {
     const { attachmentId } = uploadData;
 
     // Step 2: Submit form with attachment ID only (no file)
-    setStatus('info', 'Submitting insurance request...');
+    setStatus('info', 'Submitting enrollment...');
     const formData = new FormData(form);
     formData.delete('claim_file');
     formData.set('attachment_id', attachmentId);
@@ -135,12 +135,12 @@ form.addEventListener('submit', async (event) => {
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok || !data.ok) {
-      throw new Error(data?.message || 'An error occurred while submitting the request.');
+      throw new Error(data?.message || 'An error occurred while submitting the enrollment.');
     }
 
     setStatus(
       'success',
-      'Insurance request submitted successfully! The insurance team will get back to you shortly.'
+      'Enrollment submitted successfully! The team will get back to you shortly.'
     );
     form.reset();
     setFile(null);

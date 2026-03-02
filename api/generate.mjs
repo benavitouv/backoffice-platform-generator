@@ -42,6 +42,14 @@ const TEMPLATE_VARS = {
     TASK_TYPE:       process.env.LOAN_TASK_TYPE       || 'process_application',
     TRIGGER_ID:      process.env.LOAN_TRIGGER_ID      || '',
   },
+  provident: {
+    WEBHOOK_URL:     process.env.PROVIDENT_WEBHOOK_URL     || '',
+    WEBHOOK_SECRET:  process.env.PROVIDENT_WEBHOOK_SECRET  || '',
+    STORAGE_URL:     process.env.PROVIDENT_STORAGE_URL     || '',
+    STORAGE_API_KEY: process.env.PROVIDENT_STORAGE_API_KEY || '',
+    TASK_TYPE:       process.env.PROVIDENT_TASK_TYPE       || 'process_application',
+    TRIGGER_ID:      process.env.PROVIDENT_TRIGGER_ID      || '',
+  },
 };
 
 // ── Helpers ──
@@ -78,6 +86,7 @@ const slugifyRepoName = (customerName, templateId) => {
     .slice(0, 28);
   const suffix = templateId === 'form17' ? 'health'
     : templateId === 'insurance' ? 'insurance'
+    : templateId === 'provident' ? 'provident'
     : 'loan';
   return `${slug}-${suffix}-demo`.replace(/^-|-$/g, '');
 };
@@ -116,6 +125,8 @@ const callClaude = async ({ customerName, language, templateId, logoBase64, logo
     ? 'Healthcare Form 17 (health fund referral with hospital selection)'
     : templateId === 'insurance'
     ? 'Insurance claim submission portal'
+    : templateId === 'provident'
+    ? 'Provident fund enrollment portal (employee pension/savings fund signup with document upload)'
     : 'Bank loan application portal';
 
   const prompt = `You are customizing a web template for a customer. Analyze the logo image and customize the template files.
@@ -633,7 +644,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    const validTemplates = ['form17', 'insurance', 'loan'];
+    const validTemplates = ['form17', 'insurance', 'loan', 'provident'];
     if (!validTemplates.includes(templateId)) {
       sendSSE(res, { error: true, message: `Invalid templateId. Must be one of: ${validTemplates.join(', ')}` });
       res.end();
@@ -650,10 +661,19 @@ export default async function handler(req, res) {
 
     // ── Read English base template files ──
     const templateDir = join(__dirname, '..', 'templates', templateId);
+    // Some templates store frontend files under public/, others at the root
+    const frontendDir = await (async () => {
+      try {
+        await readFile(join(templateDir, 'public', 'index.html'), 'utf-8');
+        return join(templateDir, 'public');
+      } catch {
+        return templateDir;
+      }
+    })();
     const [indexHtml, stylesCss, appJs, serverMjs, submitMjs, healthMjs, pkgJson, vercelJson] = await Promise.all([
-      readFile(join(templateDir, 'index.html'), 'utf-8'),
-      readFile(join(templateDir, 'styles.css'), 'utf-8'),
-      readFile(join(templateDir, 'app.js'), 'utf-8'),
+      readFile(join(frontendDir, 'index.html'), 'utf-8'),
+      readFile(join(frontendDir, 'styles.css'), 'utf-8'),
+      readFile(join(frontendDir, 'app.js'), 'utf-8'),
       readFile(join(templateDir, 'server.mjs'), 'utf-8'),
       readFile(join(templateDir, 'api', 'submit.mjs'), 'utf-8'),
       readFile(join(templateDir, 'api', 'health.mjs'), 'utf-8'),

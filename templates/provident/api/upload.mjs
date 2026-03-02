@@ -45,7 +45,7 @@ export default async function handler(req, res) {
     }
 
     const contentType = file.type || 'application/octet-stream';
-    const filename = file.name || 'loan-application-upload';
+    const filename = file.name || 'provident-fund-enrollment-upload';
 
     // Step 1: Get presigned upload URL from storage API
     const storageResponse = await fetch(STORAGE_URL, {

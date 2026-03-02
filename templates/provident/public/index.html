@@ -3,11 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Loan Application Submission</title>
+    <title>Provident Fund Enrollment</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
@@ -16,13 +16,13 @@
     <main class="shell">
       <header class="brand">
         <div class="logo">
-          <img src="logo.png" alt="Bank Logo" />
+          <img src="logo.png" alt="Logo" />
         </div>
         <div class="brand-text">
-          <p class="eyebrow">Digital Loan Application Center</p>
-          <h1>Loan Application Submission</h1>
+          <p class="eyebrow">Provident Fund Services</p>
+          <h1>Provident Fund Enrollment</h1>
           <p class="subhead">
-            Fill in your details, attach the relevant document, and the system will forward your loan application for quick processing.
+            Fill in your details, attach the required documents, and the system will forward your enrollment request for prompt handling.
           </p>
         </div>
       </header>
@@ -83,7 +83,7 @@
         </label>
 
         <div class="field">
-          <span>Loan Application Document</span>
+          <span>Enrollment Documents (ID, enrollment form)</span>
           <label id="drop-zone" class="drop-zone">
             <input
               id="claim_file"
@@ -108,7 +108,7 @@
         </div>
 
         <button id="submit-btn" class="submit" type="submit">
-          <span>Submit Request</span>
+          <span>Submit Enrollment Request</span>
           <span class="spinner" aria-hidden="true"></span>
         </button>
 
@@ -124,7 +124,7 @@
       </form>
 
       <p class="footnote">
-        Documents are stored securely and forwarded directly to the loans team.
+        Documents are stored securely and forwarded directly to the provident fund team.
       </p>
     </main>
 
@@ -136,9 +136,9 @@
             <path d="M36 64l16 16 32-36" fill="none" />
           </svg>
         </div>
-        <h2 id="success-title">Request submitted successfully</h2>
-        <p>We received your documents and are forwarding them to the loans team for processing.</p>
-        <button id="success-close" class="ghost" type="button">Submit another request</button>
+        <h2 id="success-title">Enrollment Request Submitted</h2>
+        <p>We have received your documents and are forwarding them to the provident fund team.</p>
+        <button id="success-close" class="ghost" type="button">Submit Another Request</button>
       </div>
     </div>
 
@@ -153,36 +153,36 @@
             agentId: "a5141f52-16eb-4255-bdea-d5ca0cb1f8c6",
 
             // Core settings
-            agentName: 'Loan Assistant',
-            buttonText: 'Chat with Agent',
-            placeholderText: 'Type a message here...',
+            agentName: 'Support Agent',
+            buttonText: 'Talk to an agent',
+            placeholderText: 'Type your message here...',
             isRTL: false,
 
             // Main theme colors
-            primaryColor: '#2a2a2a',
-            accentColor: '#5a5a5a',
+            primaryColor: '#1e3a5f',
+            accentColor: '#20b2aa',
             textColor: '#1a1a1a',
 
             // Chat appearance
-            headerBgColor: '#2a2a2a',
+            headerBgColor: '#1e3a5f',
             headerTextColor: '#ffffff',
 
             // Message bubbles
-            userBubbleColor: '#3a3a3a',
+            userBubbleColor: '#20b2aa',
             userTextColor: '#ffffff',
-            agentBubbleColor: '#f5f5f5',
+            agentBubbleColor: '#f0f7f9',
             agentTextColor: '#1a1a1a',
 
             // Background colors
             windowBgColor: '#ffffff',
-            messagesBgColor: '#ffffff',
-            inputBgColor: '#fafafa',
+            messagesBgColor: '#fafafa',
+            inputBgColor: '#f0f7f9',
 
             // Status indicators
-            statusColor: '#2a2a2a',
+            statusColor: '#1e3a5f',
             errorColor: '#d32f2f',
 
-            // Optional logo (can be removed)
+            // Optional logo
             logoUrl: 'logo.png'
           });
         };

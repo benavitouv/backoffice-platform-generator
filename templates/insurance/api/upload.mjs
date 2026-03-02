@@ -1,5 +1,5 @@
 export const config = {
-  api: { bodyParser: true },
+  api: { bodyParser: false },
 };
 
 const getEnv = (name, fallback) => {
@@ -19,6 +19,17 @@ const jsonResponse = (res, statusCode, payload) => {
   res.end(body);
 };
 
+const readFormData = async (req) => {
+  const url = new URL(req.url || '/', 'http://localhost');
+  const request = new Request(url, {
+    method: req.method,
+    headers: req.headers,
+    body: req,
+    duplex: 'half',
+  });
+  return request.formData();
+};
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -26,11 +37,17 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { filename, contentType } = req.body || {};
-    if (!filename || !contentType) {
-      return jsonResponse(res, 400, { ok: false, error: 'missing_fields', message: 'filename and contentType are required.' });
+    const formData = await readFormData(req);
+    const file = formData.get('file');
+
+    if (!file || typeof file === 'string') {
+      return jsonResponse(res, 400, { ok: false, error: 'missing_file', message: 'No file provided.' });
     }
 
+    const contentType = file.type || 'application/octet-stream';
+    const filename = file.name || 'insurance-request-upload';
+
+    // Step 1: Get presigned upload URL from storage API
     const storageResponse = await fetch(STORAGE_URL, {
       method: 'POST',
       headers: {
@@ -53,7 +70,20 @@ export default async function handler(req, res) {
       throw new Error('Storage response missing attachment id or upload url');
     }
 
-    return jsonResponse(res, 200, { ok: true, attachmentId, uploadUrl });
+    // Step 2: Upload file to storage from server (avoids browser CORS issues)
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    const uploadResponse = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': contentType },
+      body: fileBuffer,
+    });
+
+    if (!uploadResponse.ok) {
+      const text = await uploadResponse.text();
+      throw new Error(`Upload failed (${uploadResponse.status}): ${text}`);
+    }
+
+    return jsonResponse(res, 200, { ok: true, attachmentId });
   } catch (error) {
     return jsonResponse(res, 500, {
       ok: false,
