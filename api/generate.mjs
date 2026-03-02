@@ -1070,6 +1070,17 @@ export default async function handler(req, res) {
         url: liveUrl,
         repoFullName,
         timestamp: new Date().toISOString(),
+        ...(templateId === 'custom' && customFields ? {
+          restore: {
+            websiteDescription: customFields.websiteDescription,
+            fieldsSpec:         customFields.fieldsSpec,
+            envBaseUrl:         customFields.envBaseUrl,
+            webhookUrl:         customFields.webhookUrl,
+            webhookSecret:      customFields.webhookSecret,
+            storageUrl:         customFields.storageUrl,
+            storageApiKey:      customFields.storageApiKey,
+          },
+        } : {}),
       });
     } catch (err) {
       console.warn('Non-fatal: history save failed:', err.message);

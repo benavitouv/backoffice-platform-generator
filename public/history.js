@@ -62,6 +62,7 @@ const loadHistory = async () => {
     entries.forEach((entry, i) => {
       const tr = document.createElement('tr');
       const templateLabel = TEMPLATE_LABELS[entry.templateId] || entry.templateId || '—';
+      const hasRestore = entry.templateId === 'custom' && entry.restore;
       tr.innerHTML = `
         <td class="history-row-num">${count - i}</td>
         <td><strong>${escHtml(entry.customerName)}</strong></td>
@@ -69,7 +70,14 @@ const loadHistory = async () => {
         <td>${escHtml(entry.language || '—')}</td>
         <td><a class="history-url-link" href="${escHtml(entry.url)}" target="_blank" rel="noopener noreferrer">${escHtml(entry.url)}</a></td>
         <td class="history-date">${escHtml(formatDate(entry.timestamp))}</td>
+        <td>${hasRestore ? '<button class="restore-btn" type="button">↩ Reuse</button>' : ''}</td>
       `;
+      if (hasRestore) {
+        tr.querySelector('.restore-btn').addEventListener('click', () => {
+          localStorage.setItem('pendingRestore', JSON.stringify(entry));
+          window.location.href = '/';
+        });
+      }
       tbodyEl.appendChild(tr);
     });
 

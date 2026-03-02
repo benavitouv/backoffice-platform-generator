@@ -464,6 +464,44 @@ const formatDateShort = (iso) => {
   } catch { return ''; }
 };
 
+// ── Restore form from history entry ──
+const restoreForm = (entry) => {
+  // Select the custom template card
+  templateCards.forEach(c => {
+    c.classList.remove('is-selected');
+    c.setAttribute('aria-pressed', 'false');
+  });
+  const customCard = document.querySelector('.template-card[data-template="custom"]');
+  if (customCard) {
+    customCard.classList.add('is-selected');
+    customCard.setAttribute('aria-pressed', 'true');
+  }
+  selectedTemplate = 'custom';
+  customConfig.classList.add('is-visible');
+  templateError.textContent = '';
+
+  // Common fields
+  customerNameInput.value = entry.customerName || '';
+  nameError.textContent = '';
+  languageInput.value = entry.language || 'English';
+
+  // Custom-specific fields
+  const r = entry.restore || {};
+  websiteDescInput.value    = r.websiteDescription || '';
+  fieldsSpecInput.value     = r.fieldsSpec         || '';
+  envBaseUrlInput.value     = r.envBaseUrl         || '';
+  webhookUrlInput.value     = r.webhookUrl         || '';
+  webhookSecretInput.value  = r.webhookSecret      || '';
+  storageUrlInput.value     = r.storageUrl         || '';
+  storageApiKeyInput.value  = r.storageApiKey      || '';
+  descError.textContent     = '';
+  fieldsError.textContent   = '';
+  webhookError.textContent  = '';
+  webhookSecretError.textContent = '';
+
+  showView(setupView);
+};
+
 const loadHistorySidebar = async () => {
   hsbLoading.removeAttribute('hidden');
   hsbList.setAttribute('hidden', '');
@@ -488,6 +526,7 @@ const loadHistorySidebar = async () => {
       li.className = 'hsb-entry';
       const label = TEMPLATE_LABELS[entry.templateId] || entry.templateId || '—';
       const meta = [entry.language, formatDateShort(entry.timestamp)].filter(Boolean).join(' · ');
+      const hasRestore = entry.templateId === 'custom' && entry.restore;
       li.innerHTML = `
         <div class="hsb-entry-top">
           <strong class="hsb-entry-name">${escHtml(entry.customerName)}</strong>
@@ -495,7 +534,11 @@ const loadHistorySidebar = async () => {
         </div>
         <a class="hsb-entry-url" href="${escHtml(entry.url)}" target="_blank" rel="noopener noreferrer">${escHtml(entry.url)}</a>
         <span class="hsb-entry-meta">${escHtml(meta)}</span>
+        ${hasRestore ? '<button class="hsb-restore-btn" type="button">↩ Reuse form</button>' : ''}
       `;
+      if (hasRestore) {
+        li.querySelector('.hsb-restore-btn').addEventListener('click', () => restoreForm(entry));
+      }
       hsbList.appendChild(li);
     });
     hsbList.removeAttribute('hidden');
@@ -510,4 +553,11 @@ historySidebarRefresh.addEventListener('click', loadHistorySidebar);
 
 // Load history on page load
 loadHistorySidebar();
+
+// Apply any restore data passed from the history page
+const _pendingRestore = localStorage.getItem('pendingRestore');
+if (_pendingRestore) {
+  localStorage.removeItem('pendingRestore');
+  try { restoreForm(JSON.parse(_pendingRestore)); } catch { /* ignore */ }
+}
 
