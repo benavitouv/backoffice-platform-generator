@@ -427,9 +427,21 @@ if (localStorage.getItem('sidebarCollapsed') === 'true') {
   appSidebar.classList.add('is-collapsed');
 }
 
-sidebarCollapseBtn.addEventListener('click', () => {
-  appSidebar.classList.toggle('is-collapsed');
-  localStorage.setItem('sidebarCollapsed', appSidebar.classList.contains('is-collapsed') ? 'true' : 'false');
+const toggleSidebar = (collapsed) => {
+  appSidebar.classList.toggle('is-collapsed', collapsed);
+  localStorage.setItem('sidebarCollapsed', collapsed ? 'true' : 'false');
+};
+
+// Clicking anywhere on the sidebar expands/collapses it,
+// except history entries (links/rows) and the refresh button when expanded.
+appSidebar.addEventListener('click', (e) => {
+  const isCollapsed = appSidebar.classList.contains('is-collapsed');
+  if (isCollapsed) {
+    toggleSidebar(false);
+    return;
+  }
+  if (e.target.closest('.hsb-entry') || e.target.closest('#history-sidebar-refresh')) return;
+  toggleSidebar(true);
 });
 
 const TEMPLATE_LABELS = {

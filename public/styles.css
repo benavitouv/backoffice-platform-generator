@@ -1143,6 +1143,18 @@ body {
 }
 
 /* ── Persistent left sidebar ── */
+/* Clickable areas that toggle collapse */
+.app-sidebar-brand,
+.app-sidebar-section-header,
+.app-sidebar-footer {
+  cursor: pointer;
+}
+
+/* When fully collapsed the whole strip is a click target */
+.app-sidebar.is-collapsed {
+  cursor: pointer;
+}
+
 .app-sidebar {
   width: 232px;
   flex-shrink: 0;
