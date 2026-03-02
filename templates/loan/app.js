@@ -98,11 +98,40 @@ form.addEventListener('submit', async (event) => {
 
   submitBtn.disabled = true;
   form.classList.add('is-loading');
-  setStatus('info', 'Uploading document and submitting loan application...');
 
   try {
+    // Step 1: Get presigned upload URL (tiny JSON — no file payload)
+    setStatus('info', 'Preparing upload...');
+    const uploadInitRes = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        filename: file.name,
+        contentType: file.type || 'application/octet-stream',
+      }),
+    });
+    const uploadInitData = await uploadInitRes.json().catch(() => ({}));
+    if (!uploadInitRes.ok || !uploadInitData.ok) {
+      throw new Error(uploadInitData?.message || 'Failed to prepare upload.');
+    }
+    const { attachmentId, uploadUrl } = uploadInitData;
+
+    // Step 2: Upload file directly to storage (bypasses Vercel size limit)
+    setStatus('info', 'Uploading document...');
+    const putRes = await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      body: file,
+    });
+    if (!putRes.ok) {
+      throw new Error(`Document upload failed (${putRes.status}). Please try again.`);
+    }
+
+    // Step 3: Submit form with attachment ID only (no file)
+    setStatus('info', 'Submitting loan application...');
     const formData = new FormData(form);
-    formData.set('claim_file', file);
+    formData.delete('claim_file');
+    formData.set('attachment_id', attachmentId);
 
     const response = await fetch('/api/submit', {
       method: 'POST',

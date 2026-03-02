@@ -151,7 +151,10 @@ export default async function handler(req, res) {
       });
     }
 
-    if (!file || typeof file === 'string') {
+    // Accept pre-uploaded attachment_id (from client-side direct upload)
+    // or fall back to uploading the file through the server
+    const preUploadedId = String(formData.get('attachment_id') || '').trim();
+    if (!preUploadedId && (!file || typeof file === 'string')) {
       return jsonResponse(res, 400, {
         ok: false,
         error: 'missing_file',
@@ -159,7 +162,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const attachmentId = await uploadAttachment(file);
+    const attachmentId = preUploadedId || await uploadAttachment(file);
     const webhookResult = await triggerWebhook({
       email,
       firstName,

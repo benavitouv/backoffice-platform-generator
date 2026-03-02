@@ -661,6 +661,12 @@ export default async function handler(req, res) {
       readFile(join(templateDir, 'vercel.json'), 'utf-8'),
     ]);
 
+    // Optional: upload.mjs (present in templates with file upload)
+    let uploadMjs = null;
+    try {
+      uploadMjs = await readFile(join(templateDir, 'api', 'upload.mjs'), 'utf-8');
+    } catch { /* template doesn't have a direct-upload endpoint */ }
+
     // ── Step 1: Claude customization ──
     sendSSE(res, { step: 1, status: 'loading' });
     sendLog(`Sending logo (${(logoBuffer.length / 1024).toFixed(0)} KB) + 3 template files to Claude...`);
@@ -711,6 +717,7 @@ export default async function handler(req, res) {
       'vercel.json': vercelJson,
       'api/submit.mjs': submitMjs,
       'api/health.mjs': healthMjs,
+      ...(uploadMjs ? { 'api/upload.mjs': uploadMjs } : {}),
     };
 
     const binaryFiles = {
