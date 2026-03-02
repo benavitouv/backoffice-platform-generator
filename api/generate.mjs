@@ -517,21 +517,50 @@ const addVercelEnvVars = async (projectId, templateVars) => {
   }
 };
 
-const waitForDeployment = async (projectId, projectName, sendLog) => {
+const triggerVercelDeployment = async (projectName, repoFullName) => {
+  const [org, repo] = repoFullName.split('/');
+  const res = await fetch(vercelApiUrl('/v13/deployments'), {
+    method: 'POST',
+    headers: vercelHeaders(),
+    body: JSON.stringify({
+      name: projectName,
+      gitSource: {
+        type: 'github',
+        org,
+        repo,
+        ref: 'main',
+      },
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.warn(`Warning: failed to trigger deployment (${res.status}): ${text}`);
+    return null;
+  }
+
+  const data = await res.json();
+  return data.id || null;
+};
+
+const waitForDeployment = async (projectId, projectName, sendLog, deploymentId = null) => {
   const maxAttempts = 40; // 40 × 3s = 120s
   const delay = 3000;
+  let lastState = null;
 
   for (let i = 0; i < maxAttempts; i++) {
     await new Promise(r => setTimeout(r, delay));
 
-    const res = await fetch(vercelApiUrl(`/v6/deployments?projectId=${projectId}&limit=1`), {
-      headers: vercelHeaders(),
-    });
+    // Poll specific deployment if we triggered one, otherwise poll by project
+    const pollUrl = deploymentId
+      ? vercelApiUrl(`/v13/deployments/${deploymentId}`)
+      : vercelApiUrl(`/v6/deployments?projectId=${projectId}&limit=1`);
 
+    const res = await fetch(pollUrl, { headers: vercelHeaders() });
     if (!res.ok) continue;
 
     const data = await res.json();
-    const deployment = data.deployments?.[0];
+    const deployment = deploymentId ? data : data.deployments?.[0];
 
     if (!deployment) {
       if (i === 0) sendLog('Waiting for Vercel build to start...');
@@ -539,22 +568,27 @@ const waitForDeployment = async (projectId, projectName, sendLog) => {
     }
 
     const elapsed = `${((i + 1) * 3)}s`;
-    if (deployment.state === 'BUILDING') {
-      sendLog(`Building... (${elapsed})`);
-    } else if (deployment.state === 'QUEUED' || deployment.state === 'INITIALIZING') {
-      sendLog(`Build ${deployment.state.toLowerCase()}... (${elapsed})`);
+    const state = deployment.status || deployment.state;
+
+    if (state !== lastState) {
+      lastState = state;
+      if (state === 'BUILDING') {
+        sendLog(`Building... (${elapsed})`);
+      } else if (state === 'QUEUED' || state === 'INITIALIZING') {
+        sendLog(`Build ${state.toLowerCase()}... (${elapsed})`);
+      }
     }
 
-    if (deployment.state === 'READY') {
-      return `https://${deployment.url}`;
+    if (state === 'READY') {
+      return `https://${projectName}.vercel.app`;
     }
 
-    if (deployment.state === 'ERROR' || deployment.state === 'CANCELED') {
-      throw new Error(`Vercel deployment failed with state: ${deployment.state}`);
+    if (state === 'ERROR' || state === 'CANCELED') {
+      throw new Error(`Vercel deployment failed with state: ${state}`);
     }
   }
 
-  // Timeout — return a predicted URL
+  // Timeout — return production URL
   return `https://${projectName}.vercel.app`;
 };
 
@@ -699,13 +733,21 @@ export default async function handler(req, res) {
       console.warn('Non-fatal: env vars push failed:', err.message);
     });
 
+    // Trigger deployment explicitly — the GitHub push happened before the project
+    // existed, so Vercel never received the webhook for it
+    sendLog('Triggering Vercel deployment...');
+    const deploymentId = await triggerVercelDeployment(projectName, repoFullName);
+    if (deploymentId) {
+      sendLog(`Deployment queued (${deploymentId.slice(0, 12)})`, 'done');
+    }
+
     sendSSE(res, { step: 4, status: 'done' });
 
     // ── Step 5: Wait for deployment ──
     sendSSE(res, { step: 5, status: 'loading' });
     sendLog('Waiting for Vercel to start build...');
 
-    const liveUrl = await waitForDeployment(projectId, projectName, sendLog);
+    const liveUrl = await waitForDeployment(projectId, projectName, sendLog, deploymentId);
     sendLog(`Deployment ready: ${liveUrl}`, 'done');
 
     sendSSE(res, { step: 5, status: 'done' });
