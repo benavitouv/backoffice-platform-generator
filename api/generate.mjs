@@ -665,18 +665,36 @@ export default async function handler(req, res) {
     sendSSE(res, { step: 1, status: 'loading' });
     sendLog(`Sending logo (${(logoBuffer.length / 1024).toFixed(0)} KB) + 3 template files to Claude...`);
 
+    // Send heartbeat messages every 12s while Claude is working
+    const heartbeatMsgs = [
+      'Analyzing logo image and brand colors...',
+      'Extracting dominant color palette...',
+      'Generating translated interface text...',
+      'Customizing CSS variables and theme...',
+      'Almost ready...',
+    ];
+    let heartbeatIdx = 0;
+    const heartbeat = setInterval(() => {
+      if (heartbeatIdx < heartbeatMsgs.length) sendLog(heartbeatMsgs[heartbeatIdx++]);
+    }, 12000);
+
     const claudeStart = Date.now();
-    const claudeResult = await callClaude({
-      customerName,
-      language,
-      templateId,
-      logoBase64,
-      logoMime,
-      logoExt,
-      indexHtml,
-      stylesCss,
-      appJs,
-    });
+    let claudeResult;
+    try {
+      claudeResult = await callClaude({
+        customerName,
+        language,
+        templateId,
+        logoBase64,
+        logoMime,
+        logoExt,
+        indexHtml,
+        stylesCss,
+        appJs,
+      });
+    } finally {
+      clearInterval(heartbeat);
+    }
 
     const claudeSec = ((Date.now() - claudeStart) / 1000).toFixed(1);
     sendLog(`Claude responded in ${claudeSec}s — brand color: ${claudeResult.brand.accent}`, 'done');
