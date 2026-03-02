@@ -1,5 +1,14 @@
 [
   {
+    "id": "1772469294317",
+    "customerName": "EG Bank",
+    "templateId": "loan",
+    "language": "English",
+    "url": "https://eg-bank-loan-demo.vercel.app",
+    "repoFullName": "benavitouv/eg-bank-loan-demo",
+    "timestamp": "2026-03-02T16:34:54.260Z"
+  },
+  {
     "id": "1772469113418",
     "customerName": "AcMe Insurance",
     "templateId": "insurance",
