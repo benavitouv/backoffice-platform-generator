@@ -21,10 +21,6 @@
         <header class="page-header">
           <h1>BackOffice Demo Generator</h1>
           <p class="header-sub">Choose a template, enter your customer's details, and get a live branded demo site in under a minute.</p>
-          <a href="history.html" class="nav-history-link">
-            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M2 6h12" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 2v2M10.5 2v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-            Deployment History
-          </a>
         </header>
 
         <!-- Template Selector -->
@@ -515,6 +511,47 @@
       </main>
     </div>
 
-    <script type="module" src="app.js?v=3"></script>
+    <!-- ============ HISTORY SIDEBAR ============ -->
+    <button id="history-toggle" class="history-toggle" type="button" aria-label="Deployment history" aria-expanded="false">
+      <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M2 6h12" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 2v2M10.5 2v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      History
+    </button>
+
+    <div id="history-sidebar" class="history-sidebar" aria-hidden="true" aria-label="Deployment history">
+      <div class="history-sidebar-head">
+        <h2 class="history-sidebar-title">Deployment History</h2>
+        <div class="history-sidebar-head-actions">
+          <button id="history-sidebar-refresh" class="history-sidebar-icon-btn" type="button" aria-label="Refresh">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M13.5 8a5.5 5.5 0 1 1-1.1-3.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12.5 2v3h-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button id="history-sidebar-close" class="history-sidebar-icon-btn" type="button" aria-label="Close">
+            <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="hsb-loading" class="hsb-state">
+        <div class="progress-spinner" style="width:28px;height:28px;border-width:2px"></div>
+      </div>
+
+      <ul id="hsb-list" class="hsb-list" hidden></ul>
+
+      <div id="hsb-empty" class="hsb-state" hidden>
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:40px;height:40px;color:#d1d5db"><rect x="6" y="10" width="36" height="30" rx="4" stroke="currentColor" stroke-width="1.5"/><path d="M6 18h36" stroke="currentColor" stroke-width="1.5"/><path d="M15 6v8M33 6v8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <p>No deployments yet.</p>
+      </div>
+
+      <div id="hsb-error" class="hsb-state hsb-state--error" hidden>
+        <p id="hsb-error-msg"></p>
+      </div>
+
+      <div class="history-sidebar-foot">
+        <a href="history.html" class="history-sidebar-all">View full history →</a>
+      </div>
+    </div>
+
+    <div id="history-backdrop" class="history-backdrop" hidden></div>
+
+    <script type="module" src="app.js?v=4"></script>
   </body>
 </html>

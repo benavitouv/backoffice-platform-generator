@@ -1131,32 +1131,219 @@ body {
   max-width: 36ch;
 }
 
-/* ── Nav link from main page to history ── */
-.nav-history-link {
+/* ── History toggle (floating pill) ── */
+.history-toggle {
+  position: fixed;
+  top: 18px;
+  right: 20px;
+  z-index: 48;
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 0.82rem;
-  font-weight: 500;
-  padding: 5px 13px;
+  gap: 6px;
+  padding: 7px 14px;
+  background: #ffffff;
   border: 1px solid var(--border);
   border-radius: 9999px;
-  background: white;
-  transition: color 0.15s ease, border-color 0.15s ease;
-  margin-top: 10px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink);
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
-.nav-history-link svg {
+.history-toggle svg {
   width: 13px;
   height: 13px;
   flex-shrink: 0;
 }
 
-.nav-history-link:hover {
-  color: var(--ink);
+.history-toggle:hover {
   border-color: #9ca3af;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+/* ── History sidebar ── */
+.history-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 360px;
+  max-width: 100vw;
+  background: var(--card);
+  border-left: 1px solid var(--border);
+  box-shadow: -6px 0 28px rgba(0, 0, 0, 0.08);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.history-sidebar.is-open {
+  transform: translateX(0);
+}
+
+.history-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.18);
+  z-index: 49;
+  backdrop-filter: blur(1px);
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.history-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.history-sidebar-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.history-sidebar-head-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.history-sidebar-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.history-sidebar-icon-btn svg {
+  width: 15px;
+  height: 15px;
+}
+
+.history-sidebar-icon-btn:hover {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+/* ── Sidebar states (loading / empty / error) ── */
+.hsb-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.875rem;
+  flex: 1;
+}
+
+.hsb-state p {
+  margin: 0;
+}
+
+.hsb-state--error {
+  color: #dc2626;
+}
+
+/* ── Sidebar entry list ── */
+.hsb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.hsb-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s ease;
+}
+
+.hsb-entry:last-child {
+  border-bottom: none;
+}
+
+.hsb-entry:hover {
+  background: rgba(0, 0, 0, 0.015);
+}
+
+.hsb-entry-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.hsb-entry-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hsb-entry-url {
+  font-size: 0.78rem;
+  color: var(--accent);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+.hsb-entry-url:hover {
+  text-decoration: underline;
+}
+
+.hsb-entry-meta {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+/* ── Sidebar footer ── */
+.history-sidebar-foot {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.history-sidebar-all {
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.history-sidebar-all:hover {
+  color: var(--ink);
 }
 
 /* ── Responsive ── */

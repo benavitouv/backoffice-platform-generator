@@ -412,3 +412,100 @@ retryBtn.addEventListener('click', () => {
   showView(setupView);
 });
 
+// ── History sidebar ──
+const historyToggle        = document.querySelector('#history-toggle');
+const historySidebar       = document.querySelector('#history-sidebar');
+const historySidebarClose  = document.querySelector('#history-sidebar-close');
+const historySidebarRefresh = document.querySelector('#history-sidebar-refresh');
+const historyBackdrop      = document.querySelector('#history-backdrop');
+const hsbLoading           = document.querySelector('#hsb-loading');
+const hsbList              = document.querySelector('#hsb-list');
+const hsbEmpty             = document.querySelector('#hsb-empty');
+const hsbError             = document.querySelector('#hsb-error');
+const hsbErrorMsg          = document.querySelector('#hsb-error-msg');
+
+const TEMPLATE_LABELS = {
+  form17:    'Health Referral',
+  insurance: 'Insurance',
+  loan:      'Loan',
+  provident: 'Provident',
+  custom:    'Custom',
+};
+
+const escHtml = (s) =>
+  String(s ?? '').replace(/[&<>"']/g, (c) =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
+  );
+
+const formatDateShort = (iso) => {
+  if (!iso) return '';
+  try {
+    return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  } catch { return ''; }
+};
+
+const loadHistorySidebar = async () => {
+  hsbLoading.removeAttribute('hidden');
+  hsbList.setAttribute('hidden', '');
+  hsbEmpty.setAttribute('hidden', '');
+  hsbError.setAttribute('hidden', '');
+
+  try {
+    const res = await fetch('/api/history');
+    if (!res.ok) throw new Error(`Server error ${res.status}`);
+    const entries = await res.json();
+
+    hsbLoading.setAttribute('hidden', '');
+
+    if (!Array.isArray(entries) || entries.length === 0) {
+      hsbEmpty.removeAttribute('hidden');
+      return;
+    }
+
+    hsbList.innerHTML = '';
+    entries.forEach((entry) => {
+      const li = document.createElement('li');
+      li.className = 'hsb-entry';
+      const label = TEMPLATE_LABELS[entry.templateId] || entry.templateId || '—';
+      const meta = [entry.language, formatDateShort(entry.timestamp)].filter(Boolean).join(' · ');
+      li.innerHTML = `
+        <div class="hsb-entry-top">
+          <strong class="hsb-entry-name">${escHtml(entry.customerName)}</strong>
+          <span class="template-badge" data-type="${escHtml(entry.templateId)}">${escHtml(label)}</span>
+        </div>
+        <a class="hsb-entry-url" href="${escHtml(entry.url)}" target="_blank" rel="noopener noreferrer">${escHtml(entry.url)}</a>
+        <span class="hsb-entry-meta">${escHtml(meta)}</span>
+      `;
+      hsbList.appendChild(li);
+    });
+    hsbList.removeAttribute('hidden');
+  } catch (err) {
+    hsbLoading.setAttribute('hidden', '');
+    hsbErrorMsg.textContent = `Failed to load: ${err.message}`;
+    hsbError.removeAttribute('hidden');
+  }
+};
+
+const openSidebar = () => {
+  historySidebar.classList.add('is-open');
+  historyToggle.setAttribute('aria-expanded', 'true');
+  historySidebar.setAttribute('aria-hidden', 'false');
+  historyBackdrop.removeAttribute('hidden');
+  document.body.style.overflow = 'hidden';
+  loadHistorySidebar();
+};
+
+const closeSidebar = () => {
+  historySidebar.classList.remove('is-open');
+  historyToggle.setAttribute('aria-expanded', 'false');
+  historySidebar.setAttribute('aria-hidden', 'true');
+  historyBackdrop.setAttribute('hidden', '');
+  document.body.style.overflow = '';
+};
+
+historyToggle.addEventListener('click', openSidebar);
+historySidebarClose.addEventListener('click', closeSidebar);
+historySidebarRefresh.addEventListener('click', loadHistorySidebar);
+historyBackdrop.addEventListener('click', closeSidebar);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeSidebar(); });
+
