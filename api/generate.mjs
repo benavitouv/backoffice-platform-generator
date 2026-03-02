@@ -685,9 +685,9 @@ export default async function handler(req, res) {
     // ── Assemble all files ──
     const logoFilename = `public/logo${logoExt}`;
     const textFiles = {
-      'index.html': claudeResult.files['index.html'],
-      'styles.css': claudeResult.files['styles.css'],
-      'app.js': claudeResult.files['app.js'],
+      'public/index.html': claudeResult.files['index.html'],
+      'public/styles.css': claudeResult.files['styles.css'],
+      'public/app.js': claudeResult.files['app.js'],
       'server.mjs': serverMjs,
       'package.json': pkgJson,
       'vercel.json': vercelJson,
