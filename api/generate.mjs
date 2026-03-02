@@ -727,9 +727,17 @@ export default async function handler(req, res) {
     sendSSE(res, { step: 1, status: 'done' });
 
     // ── Assemble all files ──
+    // Inject favicon link into the generated index.html
+    const faviconTag = `    <link rel="icon" type="${logoMime}" href="favicon${logoExt}" />`;
+    const generatedHtml = claudeResult.files['index.html'].replace(
+      '</head>',
+      `${faviconTag}\n  </head>`
+    );
+
     const logoFilename = `public/logo${logoExt}`;
+    const faviconFilename = `public/favicon${logoExt}`;
     const textFiles = {
-      'public/index.html': claudeResult.files['index.html'],
+      'public/index.html': generatedHtml,
       'public/styles.css': claudeResult.files['styles.css'],
       'public/app.js': claudeResult.files['app.js'],
       'server.mjs': serverMjs,
@@ -742,6 +750,7 @@ export default async function handler(req, res) {
 
     const binaryFiles = {
       [logoFilename]: logoBase64,
+      [faviconFilename]: logoBase64,
     };
 
     // ── Step 2: Create GitHub repo ──
