@@ -517,7 +517,7 @@ const addVercelEnvVars = async (projectId, templateVars) => {
   }
 };
 
-const waitForDeployment = async (projectId, projectName) => {
+const waitForDeployment = async (projectId, projectName, sendLog) => {
   const maxAttempts = 40; // 40 × 3s = 120s
   const delay = 3000;
 
@@ -533,7 +533,17 @@ const waitForDeployment = async (projectId, projectName) => {
     const data = await res.json();
     const deployment = data.deployments?.[0];
 
-    if (!deployment) continue;
+    if (!deployment) {
+      if (i === 0) sendLog('Waiting for Vercel build to start...');
+      continue;
+    }
+
+    const elapsed = `${((i + 1) * 3)}s`;
+    if (deployment.state === 'BUILDING') {
+      sendLog(`Building... (${elapsed})`);
+    } else if (deployment.state === 'QUEUED' || deployment.state === 'INITIALIZING') {
+      sendLog(`Build ${deployment.state.toLowerCase()}... (${elapsed})`);
+    }
 
     if (deployment.state === 'READY') {
       return `https://${deployment.url}`;
@@ -569,6 +579,12 @@ export default async function handler(req, res) {
   res.setHeader('X-Accel-Buffering', 'no');
   res.statusCode = 200;
 
+  const startedAt = Date.now();
+  const sendLog = (message, type = 'info') => {
+    const elapsed = ((Date.now() - startedAt) / 1000).toFixed(1);
+    sendSSE(res, { log: true, message, elapsed, type });
+  };
+
   try {
     // ── Parse form data ──
     const formData = await readFormData(req);
@@ -596,6 +612,8 @@ export default async function handler(req, res) {
     const logoMime = logoFileEntry.type || 'image/png';
     const logoExt = mimeToExt(logoMime);
 
+    sendLog(`Starting generation for "${customerName}" — ${templateId} template, ${language}`);
+
     // ── Read English base template files ──
     const templateDir = join(__dirname, '..', 'templates', templateId);
     const [indexHtml, stylesCss, appJs, serverMjs, submitMjs, healthMjs, pkgJson, vercelJson] = await Promise.all([
@@ -611,7 +629,9 @@ export default async function handler(req, res) {
 
     // ── Step 1: Claude customization ──
     sendSSE(res, { step: 1, status: 'loading' });
+    sendLog(`Sending logo (${(logoBuffer.length / 1024).toFixed(0)} KB) + 3 template files to Claude...`);
 
+    const claudeStart = Date.now();
     const claudeResult = await callClaude({
       customerName,
       language,
@@ -624,6 +644,8 @@ export default async function handler(req, res) {
       appJs,
     });
 
+    const claudeSec = ((Date.now() - claudeStart) / 1000).toFixed(1);
+    sendLog(`Claude responded in ${claudeSec}s — brand color: ${claudeResult.brand.accent}`, 'done');
     sendSSE(res, { step: 1, status: 'done' });
 
     // ── Assemble all files ──
@@ -647,23 +669,32 @@ export default async function handler(req, res) {
     sendSSE(res, { step: 2, status: 'loading' });
 
     const repoName = slugifyRepoName(customerName, templateId);
+    sendLog(`Creating GitHub repo "${repoName}"...`);
     const { repoFullName } = await createGitHubRepo(repoName, customerName);
+    sendLog(`Repo created: github.com/${repoFullName}`, 'done');
 
     sendSSE(res, { step: 2, status: 'done' });
 
     // ── Step 3: Push files to GitHub ──
     sendSSE(res, { step: 3, status: 'loading' });
 
-    await pushFilesToGitHub({ repoFullName, textFiles, binaryFiles });
+    const fileCount = Object.keys(textFiles).length + Object.keys(binaryFiles).length;
+    sendLog(`Pushing ${fileCount} files to GitHub...`);
+    const { commitSha } = await pushFilesToGitHub({ repoFullName, textFiles, binaryFiles });
+    sendLog(`Committed ${fileCount} files (${commitSha.slice(0, 7)})`, 'done');
 
     sendSSE(res, { step: 3, status: 'done' });
 
     // ── Step 4: Create Vercel project ──
     sendSSE(res, { step: 4, status: 'loading' });
 
+    sendLog(`Creating Vercel project "${repoName}"...`);
     const { projectId, projectName } = await createVercelProject(repoName, repoFullName);
+    sendLog(`Vercel project created (${projectName})`, 'done');
 
     // Add env vars (non-blocking for the stream)
+    const templateVarCount = Object.values(TEMPLATE_VARS[templateId]).filter(Boolean).length;
+    sendLog(`Injecting ${templateVarCount} environment variables...`);
     addVercelEnvVars(projectId, TEMPLATE_VARS[templateId]).catch(err => {
       console.warn('Non-fatal: env vars push failed:', err.message);
     });
@@ -672,8 +703,10 @@ export default async function handler(req, res) {
 
     // ── Step 5: Wait for deployment ──
     sendSSE(res, { step: 5, status: 'loading' });
+    sendLog('Waiting for Vercel to start build...');
 
-    const liveUrl = await waitForDeployment(projectId, projectName);
+    const liveUrl = await waitForDeployment(projectId, projectName, sendLog);
+    sendLog(`Deployment ready: ${liveUrl}`, 'done');
 
     sendSSE(res, { step: 5, status: 'done' });
 

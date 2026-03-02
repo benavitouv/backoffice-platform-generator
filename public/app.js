@@ -28,6 +28,7 @@ const languageInput = document.querySelector('#language-input');
 const languageError = document.querySelector('#language-error');
 
 const steps = document.querySelectorAll('.step');
+const logList = document.querySelector('#log-list');
 const errorPanel = document.querySelector('#error-panel');
 const errorMessage = document.querySelector('#error-message');
 const retryBtn = document.querySelector('#retry-btn');
@@ -182,8 +183,19 @@ const setStepStatus = (stepNum, status) => {
 
 const resetSteps = () => {
   steps.forEach(s => { s.dataset.status = 'pending'; });
+  logList.innerHTML = '';
   errorPanel.setAttribute('hidden', '');
   errorMessage.textContent = '';
+};
+
+// ── Log panel ──
+const addLogEntry = (message, elapsed, type = 'info') => {
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.dataset.type = type;
+  entry.innerHTML = `<span class="log-time">${elapsed}s</span><span class="log-msg">${message}</span>`;
+  logList.appendChild(entry);
+  logList.scrollTop = logList.scrollHeight;
 };
 
 // ── SSE / fetch stream consumer ──
@@ -229,6 +241,11 @@ let rejectGeneration;
 const handleSSEEvent = (event) => {
   if (event.error) {
     rejectGeneration?.(new Error(event.message || 'Generation failed'));
+    return;
+  }
+
+  if (event.log) {
+    addLogEntry(event.message, event.elapsed, event.type || 'info');
     return;
   }
 
