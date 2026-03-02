@@ -1061,15 +1061,19 @@ export default async function handler(req, res) {
     // ── Done ──
     sendSSE(res, { done: true, url: liveUrl });
 
-    // Non-blocking — record deployment in history
-    appendToHistory({
-      customerName,
-      templateId,
-      language,
-      url: liveUrl,
-      repoFullName,
-      timestamp: new Date().toISOString(),
-    }).catch(err => console.warn('Non-fatal: history save failed:', err.message));
+    // Save history before closing — Vercel terminates the function after res.end()
+    try {
+      await appendToHistory({
+        customerName,
+        templateId,
+        language,
+        url: liveUrl,
+        repoFullName,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err) {
+      console.warn('Non-fatal: history save failed:', err.message);
+    }
 
     res.end();
 
