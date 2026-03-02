@@ -338,10 +338,13 @@ body {
 /* ── Language select ── */
 .language-select {
   width: auto;
-  padding: 10px 14px;
+  padding: 10px 36px 10px 14px;
   border-radius: 8px;
   border: 1px solid var(--border);
-  background: #ffffff;
+  background: #ffffff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+  background-size: 12px 8px;
+  appearance: none;
+  -webkit-appearance: none;
   font-size: 0.95rem;
   color: var(--ink);
   font-family: inherit;
