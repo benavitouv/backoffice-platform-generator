@@ -788,7 +788,7 @@ const waitForDeployment = async (projectId, projectName, sendLog, deploymentId =
 };
 
 // ── History ──
-const appendToHistory = async ({ customerName, templateId, language, url, repoFullName, timestamp }) => {
+const appendToHistory = async ({ customerName, templateId, language, url, repoFullName, timestamp, restore }) => {
   if (!GITHUB_TOKEN || !GITHUB_OWNER || !PLATFORM_REPO) return;
 
   const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${PLATFORM_REPO}/contents/history.json`;
@@ -807,7 +807,7 @@ const appendToHistory = async ({ customerName, templateId, language, url, repoFu
     throw new Error(`Failed to fetch history (${fetchRes.status})`);
   }
 
-  const newEntry = { id: String(Date.now()), customerName, templateId, language, url, repoFullName, timestamp };
+  const newEntry = { id: String(Date.now()), customerName, templateId, language, url, repoFullName, timestamp, ...(restore ? { restore } : {}) };
   const newEntries = [newEntry, ...currentEntries].slice(0, 200);
   const content = Buffer.from(JSON.stringify(newEntries, null, 2)).toString('base64');
 
