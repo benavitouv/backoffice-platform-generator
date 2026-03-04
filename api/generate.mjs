@@ -16,6 +16,7 @@ const GITHUB_OWNER = process.env.GITHUB_OWNER || '';
 const VERCEL_TOKEN = process.env.VERCEL_TOKEN || '';
 const VERCEL_TEAM_ID = process.env.VERCEL_TEAM_ID || '';
 const PLATFORM_REPO = process.env.PLATFORM_REPO || 'backoffice-platform-generator';
+const PLATFORM_URL  = (process.env.PLATFORM_URL || '').replace(/\/$/, '');
 
 // Per-template env vars to inject into new Vercel projects
 const TEMPLATE_VARS = {
@@ -1005,6 +1006,17 @@ export default async function handler(req, res) {
     sendLog(`Repo created: github.com/${repoFullName}`, 'done');
 
     sendSSE(res, { step: 2, status: 'done' });
+
+    // ── Inject "Edit site" FAB ──
+    // After repo name is known, embed a floating edit button into the generated HTML.
+    // The button links back to this platform generator so operators can iterate quickly.
+    if (PLATFORM_URL) {
+      const editUrl = `${PLATFORM_URL}/?editRepo=${encodeURIComponent(repoFullName)}&customerName=${encodeURIComponent(customerName)}`;
+      const editFab = `
+  <!-- BackOffice Platform edit shortcut -->
+  <a id="plt-edit-fab" href="${editUrl}" target="_blank" rel="noopener" title="Edit this site" style="position:fixed;bottom:20px;right:20px;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,0.96);border:1px solid rgba(0,0,0,0.1);border-radius:24px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-family:system-ui,-apple-system,sans-serif;font-size:13px;font-weight:500;color:#374151;z-index:9999;text-decoration:none;backdrop-filter:blur(8px);" onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.18)';this.style.transform='translateY(-1px)'" onmouseout="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.12)';this.style.transform=''"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit site</a>`;
+      textFiles['public/index.html'] = textFiles['public/index.html'].replace('</body>', `${editFab}\n</body>`);
+    }
 
     // ── Step 3: Push files to GitHub ──
     sendSSE(res, { step: 3, status: 'loading' });

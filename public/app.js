@@ -716,3 +716,15 @@ if (_pendingEdit) {
   try { openEditModal(JSON.parse(_pendingEdit)); } catch { /* ignore */ }
 }
 
+// Open edit modal when arriving from a generated site's "Edit site" FAB
+// URL format: /?editRepo=owner/repo&customerName=Acme+Bank
+const _urlParams = new URLSearchParams(window.location.search);
+const _editRepo = _urlParams.get('editRepo');
+if (_editRepo) {
+  history.replaceState({}, '', window.location.pathname); // clean URL bar
+  openEditModal({
+    repoFullName: _editRepo,
+    customerName: _urlParams.get('customerName') || _editRepo.split('/').pop(),
+  });
+}
+
