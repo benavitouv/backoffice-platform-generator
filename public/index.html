@@ -11,7 +11,7 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="styles.css?v=7" />
+    <link rel="stylesheet" href="styles.css?v=8" />
   </head>
   <body>
 
@@ -571,6 +571,125 @@
       </div><!-- /.app-content -->
     </div><!-- /.app-layout -->
 
-    <script type="module" src="app.js?v=7"></script>
+    <!-- ============ EDIT MODAL ============ -->
+    <div id="edit-modal" class="modal-overlay" hidden>
+      <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="edit-modal-title">
+
+        <!-- State: form -->
+        <div id="edit-form-state">
+          <div class="modal-header">
+            <h2 class="modal-title" id="edit-modal-title">Edit <span id="edit-modal-name">—</span>'s site</h2>
+            <button id="edit-modal-close" class="modal-close-btn" type="button" aria-label="Close">
+              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <div class="modal-body">
+            <label class="field">
+              <span class="field-label">Describe the changes you want</span>
+              <span class="field-hint">Claude will modify the live site files and redeploy automatically.</span>
+              <textarea id="edit-prompt" class="field-textarea" rows="5"
+                placeholder="e.g. Change the submit button color to red. Add a required phone number field. Translate the page title to French."></textarea>
+              <p class="field-error" id="edit-prompt-error" aria-live="polite"></p>
+            </label>
+          </div>
+          <div class="modal-footer">
+            <button id="edit-cancel-btn" class="ghost-btn" type="button">Cancel</button>
+            <button id="edit-submit-btn" class="primary-btn" type="button">
+              Apply Changes
+              <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- State: progress -->
+        <div id="edit-progress-state" hidden>
+          <div class="modal-header">
+            <h2 class="modal-title" id="edit-modal-title">Applying changes to <span id="edit-modal-name-progress">—</span>'s site…</h2>
+          </div>
+          <div class="modal-body">
+            <div class="steps-card">
+              <div class="step" data-edit-step="1" data-status="pending">
+                <div class="step-icon" aria-hidden="true">
+                  <svg class="step-check" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <svg class="step-spinner" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" stroke-dasharray="40" stroke-dashoffset="15" stroke-linecap="round"/></svg>
+                  <span class="step-num">1</span>
+                </div>
+                <div class="step-body">
+                  <strong>Fetching current website files</strong>
+                  <span>Reading latest version from GitHub</span>
+                </div>
+              </div>
+              <div class="step" data-edit-step="2" data-status="pending">
+                <div class="step-icon" aria-hidden="true">
+                  <svg class="step-check" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <svg class="step-spinner" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" stroke-dasharray="40" stroke-dashoffset="15" stroke-linecap="round"/></svg>
+                  <span class="step-num">2</span>
+                </div>
+                <div class="step-body">
+                  <strong>Applying changes with Claude AI</strong>
+                  <span>Modifying files according to your instructions</span>
+                </div>
+              </div>
+              <div class="step" data-edit-step="3" data-status="pending">
+                <div class="step-icon" aria-hidden="true">
+                  <svg class="step-check" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <svg class="step-spinner" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" stroke-dasharray="40" stroke-dashoffset="15" stroke-linecap="round"/></svg>
+                  <span class="step-num">3</span>
+                </div>
+                <div class="step-body">
+                  <strong>Pushing updates to GitHub</strong>
+                  <span>Committing the modified files</span>
+                </div>
+              </div>
+              <div class="step" data-edit-step="4" data-status="pending">
+                <div class="step-icon" aria-hidden="true">
+                  <svg class="step-check" viewBox="0 0 16 16" fill="none"><path d="M3 8.5l3 3 7-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <svg class="step-spinner" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5" stroke-dasharray="40" stroke-dashoffset="15" stroke-linecap="round"/></svg>
+                  <span class="step-num">4</span>
+                </div>
+                <div class="step-body">
+                  <strong>Deploying to Vercel</strong>
+                  <span>Waiting for the build to go live</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- State: result -->
+        <div id="edit-result-state" hidden>
+          <div class="modal-header">
+            <h2 class="modal-title">Changes applied!</h2>
+            <button id="edit-result-close" class="modal-close-btn" type="button" aria-label="Close">
+              <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <div class="modal-body modal-body--result">
+            <div class="result-url-box">
+              <a id="edit-result-link" href="#" target="_blank" rel="noopener noreferrer" class="result-url"></a>
+            </div>
+            <div class="result-actions">
+              <a id="edit-open-btn" href="#" target="_blank" rel="noopener noreferrer" class="primary-btn">
+                Open Site
+                <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"/><path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"/></svg>
+              </a>
+              <button id="edit-done-btn" class="ghost-btn" type="button">Done</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- State: error -->
+        <div id="edit-error-panel" class="modal-body" hidden>
+          <div class="error-panel">
+            <p class="error-title">Something went wrong</p>
+            <p id="edit-error-msg" class="error-message"></p>
+            <button id="edit-retry-btn" class="ghost-btn" style="margin-top:4px">Try again</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <script type="module" src="app.js?v=8"></script>
   </body>
 </html>

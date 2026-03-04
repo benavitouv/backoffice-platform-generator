@@ -412,6 +412,146 @@ retryBtn.addEventListener('click', () => {
   showView(setupView);
 });
 
+// ── Edit modal DOM refs ──
+const editModal           = document.querySelector('#edit-modal');
+const editModalName       = document.querySelector('#edit-modal-name');
+const editModalNameProg   = document.querySelector('#edit-modal-name-progress');
+const editFormState       = document.querySelector('#edit-form-state');
+const editProgressState   = document.querySelector('#edit-progress-state');
+const editResultState     = document.querySelector('#edit-result-state');
+const editPromptInput     = document.querySelector('#edit-prompt');
+const editPromptError     = document.querySelector('#edit-prompt-error');
+const editModalClose      = document.querySelector('#edit-modal-close');
+const editCancelBtn       = document.querySelector('#edit-cancel-btn');
+const editSubmitBtn       = document.querySelector('#edit-submit-btn');
+const editResultClose     = document.querySelector('#edit-result-close');
+const editResultLink      = document.querySelector('#edit-result-link');
+const editOpenBtn         = document.querySelector('#edit-open-btn');
+const editDoneBtn         = document.querySelector('#edit-done-btn');
+const editErrorPanel      = document.querySelector('#edit-error-panel');
+const editErrorMsg        = document.querySelector('#edit-error-msg');
+const editRetryBtn        = document.querySelector('#edit-retry-btn');
+
+let editEntry = null;
+
+const setEditStepStatus = (step, status) => {
+  const el = document.querySelector(`.step[data-edit-step="${step}"]`);
+  if (el) el.setAttribute('data-status', status);
+};
+
+const openEditModal = (entry) => {
+  editEntry = entry;
+  editModalName.textContent       = entry.customerName || '—';
+  editModalNameProg.textContent   = entry.customerName || '—';
+  editPromptInput.value           = '';
+  editPromptError.textContent     = '';
+  editFormState.removeAttribute('hidden');
+  editProgressState.setAttribute('hidden', '');
+  editResultState.setAttribute('hidden', '');
+  editErrorPanel.setAttribute('hidden', '');
+  editModal.removeAttribute('hidden');
+  editPromptInput.focus();
+};
+
+const closeEditModal = () => {
+  editModal.setAttribute('hidden', '');
+  editEntry = null;
+};
+
+editModalClose.addEventListener('click', closeEditModal);
+editCancelBtn.addEventListener('click', closeEditModal);
+editResultClose.addEventListener('click', () => {
+  closeEditModal();
+  loadHistorySidebar();
+});
+editDoneBtn.addEventListener('click', () => {
+  closeEditModal();
+  loadHistorySidebar();
+});
+
+// Click outside panel to close
+editModal.addEventListener('click', (e) => {
+  if (e.target === editModal) closeEditModal();
+});
+
+// Escape to close
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !editModal.hasAttribute('hidden')) closeEditModal();
+});
+
+editRetryBtn.addEventListener('click', () => {
+  editErrorPanel.setAttribute('hidden', '');
+  editFormState.removeAttribute('hidden');
+});
+
+editSubmitBtn.addEventListener('click', async () => {
+  const prompt = editPromptInput.value.trim();
+  if (!prompt) {
+    editPromptError.textContent = 'Please describe the changes you want.';
+    editPromptInput.focus();
+    return;
+  }
+  if (!editEntry?.repoFullName) {
+    editPromptError.textContent = 'No repository linked to this deployment.';
+    return;
+  }
+  editPromptError.textContent = '';
+
+  editFormState.setAttribute('hidden', '');
+  editProgressState.removeAttribute('hidden');
+  editResultState.setAttribute('hidden', '');
+  editErrorPanel.setAttribute('hidden', '');
+
+  document.querySelectorAll('.step[data-edit-step]').forEach(s => s.setAttribute('data-status', 'pending'));
+
+  try {
+    const response = await fetch('/api/redeploy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ repoFullName: editEntry.repoFullName, editPrompt: prompt }),
+    });
+
+    if (!response.ok) throw new Error(`Server error (${response.status})`);
+
+    let resolveEdit, rejectEdit;
+    const editDonePromise = new Promise((res, rej) => { resolveEdit = res; rejectEdit = rej; });
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buf += decoder.decode(value, { stream: true });
+      const lines = buf.split('\n');
+      buf = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        try {
+          const ev = JSON.parse(line.slice(6));
+          if (ev.error) { rejectEdit(new Error(ev.message || 'Edit failed')); break; }
+          if (ev.step && ev.status) setEditStepStatus(ev.step, ev.status === 'loading' ? 'active' : 'done');
+          if (ev.done && ev.url) resolveEdit(ev.url);
+        } catch { /* ignore */ }
+      }
+    }
+
+    const url = await editDonePromise;
+    const displayUrl = url.startsWith('https://') ? url : `https://${url}`;
+    editResultLink.href       = displayUrl;
+    editResultLink.textContent = displayUrl;
+    editOpenBtn.href          = displayUrl;
+
+    editProgressState.setAttribute('hidden', '');
+    editResultState.removeAttribute('hidden');
+
+  } catch (err) {
+    editProgressState.setAttribute('hidden', '');
+    editErrorMsg.textContent = err.message || 'An unexpected error occurred.';
+    editErrorPanel.removeAttribute('hidden');
+  }
+});
+
 // ── History sidebar ──
 const appSidebar            = document.querySelector('#app-sidebar');
 const sidebarCollapseBtn    = document.querySelector('#sidebar-collapse-btn');
@@ -440,7 +580,7 @@ appSidebar.addEventListener('click', (e) => {
     toggleSidebar(false);
     return;
   }
-  if (e.target.closest('.hsb-entry') || e.target.closest('#history-sidebar-refresh')) return;
+  if (e.target.closest('.hsb-entry') || e.target.closest('#history-sidebar-refresh') || e.target.closest('#edit-modal')) return;
   toggleSidebar(true);
 });
 
@@ -527,6 +667,7 @@ const loadHistorySidebar = async () => {
       const label = TEMPLATE_LABELS[entry.templateId] || entry.templateId || '—';
       const meta = [entry.language, formatDateShort(entry.timestamp)].filter(Boolean).join(' · ');
       const hasRestore = entry.templateId === 'custom';
+      const hasEdit    = !!entry.repoFullName;
       li.innerHTML = `
         <div class="hsb-entry-top">
           <strong class="hsb-entry-name">${escHtml(entry.customerName)}</strong>
@@ -534,10 +675,17 @@ const loadHistorySidebar = async () => {
         </div>
         <a class="hsb-entry-url" href="${escHtml(entry.url)}" target="_blank" rel="noopener noreferrer">${escHtml(entry.url)}</a>
         <span class="hsb-entry-meta">${escHtml(meta)}</span>
-        ${hasRestore ? '<button class="hsb-restore-btn" type="button">↩ Reuse form</button>' : ''}
+        ${hasRestore || hasEdit ? `
+        <div class="hsb-entry-actions">
+          ${hasRestore ? '<button class="hsb-restore-btn" type="button">↩ Reuse form</button>' : ''}
+          ${hasEdit    ? '<button class="hsb-edit-btn"    type="button">✏ Edit site</button>'  : ''}
+        </div>` : ''}
       `;
       if (hasRestore) {
         li.querySelector('.hsb-restore-btn').addEventListener('click', () => restoreForm(entry));
+      }
+      if (hasEdit) {
+        li.querySelector('.hsb-edit-btn').addEventListener('click', () => openEditModal(entry));
       }
       hsbList.appendChild(li);
     });
@@ -559,5 +707,12 @@ const _pendingRestore = localStorage.getItem('pendingRestore');
 if (_pendingRestore) {
   localStorage.removeItem('pendingRestore');
   try { restoreForm(JSON.parse(_pendingRestore)); } catch { /* ignore */ }
+}
+
+// Open edit modal for entry passed from the history page
+const _pendingEdit = localStorage.getItem('pendingEdit');
+if (_pendingEdit) {
+  localStorage.removeItem('pendingEdit');
+  try { openEditModal(JSON.parse(_pendingEdit)); } catch { /* ignore */ }
 }
 
