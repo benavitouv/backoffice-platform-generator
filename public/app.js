@@ -431,6 +431,16 @@ const editDoneBtn         = document.querySelector('#edit-done-btn');
 const editErrorPanel      = document.querySelector('#edit-error-panel');
 const editErrorMsg        = document.querySelector('#edit-error-msg');
 const editRetryBtn        = document.querySelector('#edit-retry-btn');
+const editLogList         = document.querySelector('#edit-log-list');
+
+const addEditLogEntry = (message, elapsed, type = 'info') => {
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.dataset.type = type;
+  entry.innerHTML = `<span class="log-time">${elapsed}s</span><span class="log-msg">${message}</span>`;
+  editLogList.appendChild(entry);
+  editLogList.scrollTop = editLogList.scrollHeight;
+};
 
 let editEntry = null;
 
@@ -503,6 +513,7 @@ editSubmitBtn.addEventListener('click', async () => {
   editErrorPanel.setAttribute('hidden', '');
 
   document.querySelectorAll('.step[data-edit-step]').forEach(s => s.setAttribute('data-status', 'pending'));
+  editLogList.innerHTML = '';
 
   try {
     const response = await fetch('/api/redeploy', {
@@ -530,6 +541,7 @@ editSubmitBtn.addEventListener('click', async () => {
         try {
           const ev = JSON.parse(line.slice(6));
           if (ev.error) { rejectEdit(new Error(ev.message || 'Edit failed')); break; }
+          if (ev.log)   { addEditLogEntry(ev.message, ev.elapsed, ev.type || 'info'); }
           if (ev.step && ev.status) setEditStepStatus(ev.step, ev.status === 'loading' ? 'active' : 'done');
           if (ev.done && ev.url) resolveEdit(ev.url);
         } catch { /* ignore */ }

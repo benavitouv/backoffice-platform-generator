@@ -53,8 +53,8 @@ const getDefaultBranch = async (repoFullName) => {
 };
 
 // ── Push modified files via tree API (single commit) ──
-const pushFilesToGitHub = async (repoFullName, textFiles) => {
-  const branch = await getDefaultBranch(repoFullName);
+const pushFilesToGitHub = async (repoFullName, textFiles, branch) => {
+  if (!branch) branch = await getDefaultBranch(repoFullName);
 
   const refRes = await fetch(`https://api.github.com/repos/${repoFullName}/git/ref/heads/${branch}`, {
     headers: githubHeaders(),
@@ -265,7 +265,11 @@ export default async function handler(req, res) {
   res.setHeader('X-Accel-Buffering', 'no');
   res.statusCode = 200;
 
-  const sendLog = (msg) => sendSSE(res, { log: true, message: msg, elapsed: '…' });
+  const startedAt = Date.now();
+  const sendLog = (msg, type = 'info') => {
+    const elapsed = ((Date.now() - startedAt) / 1000).toFixed(1);
+    sendSSE(res, { log: true, message: msg, elapsed, type });
+  };
 
   try {
     const { repoFullName, editPrompt } = req.body || {};
@@ -277,41 +281,60 @@ export default async function handler(req, res) {
     }
 
     const repoName = repoFullName.split('/')[1];
+    sendLog(`Starting edit for "${repoName}"...`);
 
     // ── Step 1: Fetch files from GitHub ──
     sendSSE(res, { step: 1, status: 'loading' });
-    sendLog(`Fetching files from github.com/${repoFullName}...`);
+    sendLog(`Connecting to github.com/${repoFullName}...`);
 
     // Generated repos always place frontend files under public/
-    let [indexHtml, stylesCss, appJs] = await Promise.all([
-      fetchRepoFile(repoFullName, 'public/index.html'),
-      fetchRepoFile(repoFullName, 'public/styles.css'),
-      fetchRepoFile(repoFullName, 'public/app.js'),
-    ]);
-    let filePrefix = 'public/';
+    sendLog('Fetching public/index.html...');
+    let indexHtml = await fetchRepoFile(repoFullName, 'public/index.html');
+    let stylesCss, appJs, filePrefix;
 
-    // Fallback: some older or custom repos might have files at root
-    if (!indexHtml) {
+    if (indexHtml) {
+      filePrefix = 'public/';
+      sendLog('Fetching public/styles.css...');
+      stylesCss = await fetchRepoFile(repoFullName, 'public/styles.css');
+      sendLog('Fetching public/app.js...');
+      appJs = await fetchRepoFile(repoFullName, 'public/app.js');
+    } else {
+      // Fallback: some older or custom repos might have files at root
+      sendLog('Trying root directory fallback...');
+      filePrefix = '';
       [indexHtml, stylesCss, appJs] = await Promise.all([
         fetchRepoFile(repoFullName, 'index.html'),
         fetchRepoFile(repoFullName, 'styles.css'),
         fetchRepoFile(repoFullName, 'app.js'),
       ]);
-      filePrefix = '';
     }
 
     if (!indexHtml || !stylesCss || !appJs) {
       throw new Error('Could not fetch website files from the repository. Make sure the repo is accessible.');
     }
 
-    sendLog('Files fetched successfully');
+    const totalKb = ((indexHtml.length + stylesCss.length + appJs.length) / 1024).toFixed(1);
+    sendLog(`Fetched 3 files — ${totalKb} KB total`, 'done');
     sendSSE(res, { step: 1, status: 'done' });
 
     // ── Step 2: Apply edits with Claude ──
     sendSSE(res, { step: 2, status: 'loading' });
-    sendLog('Sending files to Claude for editing...');
+    sendLog(`Sending ${totalKb} KB to Claude (claude-sonnet-4-6)...`);
+    sendLog(`Edit instructions: "${editPrompt.slice(0, 80)}${editPrompt.length > 80 ? '…' : ''}"`);
 
-    const heartbeat = setInterval(() => sendLog('Claude is applying changes...'), 12000);
+    const heartbeatMsgs = [
+      'Analyzing your requested changes...',
+      'Applying edits to HTML structure...',
+      'Updating CSS styles...',
+      'Modifying JavaScript logic...',
+      'Almost done...',
+    ];
+    let hbIdx = 0;
+    const heartbeat = setInterval(() => {
+      if (hbIdx < heartbeatMsgs.length) sendLog(heartbeatMsgs[hbIdx++]);
+    }, 12000);
+
+    const claudeStart = Date.now();
     let modifiedFiles;
     try {
       modifiedFiles = await callClaudeEdit({ indexHtml, stylesCss, appJs, editPrompt });
@@ -319,39 +342,46 @@ export default async function handler(req, res) {
       clearInterval(heartbeat);
     }
 
-    sendLog('Changes applied successfully');
+    const claudeSec = ((Date.now() - claudeStart) / 1000).toFixed(1);
+    sendLog(`Claude responded in ${claudeSec}s — files ready`, 'done');
     sendSSE(res, { step: 2, status: 'done' });
 
     // ── Step 3: Push updated files to GitHub ──
     sendSSE(res, { step: 3, status: 'loading' });
-    sendLog('Pushing updated files to GitHub...');
+    sendLog(`Reading current branch of ${repoFullName}...`);
+
+    const branch = await getDefaultBranch(repoFullName);
+    sendLog(`Branch: ${branch}`);
+    sendLog('Building file tree (3 files)...');
 
     const commitSha = await pushFilesToGitHub(repoFullName, {
       [`${filePrefix}index.html`]: modifiedFiles['index.html'],
       [`${filePrefix}styles.css`]: modifiedFiles['styles.css'],
       [`${filePrefix}app.js`]:     modifiedFiles['app.js'],
-    });
-    sendLog(`Committed changes (${commitSha.slice(0, 7)})`);
+    }, branch);
+    sendLog(`Committed to ${branch} (${commitSha.slice(0, 7)})`, 'done');
     sendSSE(res, { step: 3, status: 'done' });
 
     // ── Step 4: Deploy to Vercel ──
     sendSSE(res, { step: 4, status: 'loading' });
-    sendLog('Triggering Vercel deployment...');
+    sendLog(`Looking up Vercel project "${repoName}"...`);
 
-    const branch = await getDefaultBranch(repoFullName);
     const project = await getVercelProject(repoName);
 
     let liveUrl;
     if (project) {
+      sendLog(`Project found (${project.id.slice(0, 8)})`);
+      sendLog(`Triggering deployment from ${branch}...`);
       const deploymentId = await triggerVercelDeployment(repoName, repoFullName, branch);
-      if (deploymentId) sendLog(`Deployment queued (${deploymentId.slice(0, 12)})`);
+      if (deploymentId) sendLog(`Deployment queued (${deploymentId.slice(0, 14)})`);
       liveUrl = await waitForDeployment(project.id, repoName, sendLog, deploymentId);
     } else {
-      sendLog('Vercel project not found — changes are live on next auto-deploy');
+      sendLog('Vercel project not found — changes committed to GitHub');
       liveUrl = `https://${repoName}.vercel.app`;
     }
 
-    sendLog(`Deployed: ${liveUrl}`);
+    const totalSec = ((Date.now() - startedAt) / 1000).toFixed(1);
+    sendLog(`Live at ${liveUrl} — done in ${totalSec}s`, 'done');
     sendSSE(res, { step: 4, status: 'done' });
 
     sendSSE(res, { done: true, url: liveUrl });
