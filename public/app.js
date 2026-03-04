@@ -526,7 +526,7 @@ const loadHistorySidebar = async () => {
       li.className = 'hsb-entry';
       const label = TEMPLATE_LABELS[entry.templateId] || entry.templateId || '—';
       const meta = [entry.language, formatDateShort(entry.timestamp)].filter(Boolean).join(' · ');
-      const hasRestore = entry.templateId === 'custom' && entry.restore;
+      const hasRestore = entry.templateId === 'custom';
       li.innerHTML = `
         <div class="hsb-entry-top">
           <strong class="hsb-entry-name">${escHtml(entry.customerName)}</strong>

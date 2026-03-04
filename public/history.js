@@ -62,7 +62,7 @@ const loadHistory = async () => {
     entries.forEach((entry, i) => {
       const tr = document.createElement('tr');
       const templateLabel = TEMPLATE_LABELS[entry.templateId] || entry.templateId || '—';
-      const hasRestore = entry.templateId === 'custom' && entry.restore;
+      const hasRestore = entry.templateId === 'custom';
       tr.innerHTML = `
         <td class="history-row-num">${count - i}</td>
         <td><strong>${escHtml(entry.customerName)}</strong></td>
