@@ -1008,13 +1008,65 @@ export default async function handler(req, res) {
     sendSSE(res, { step: 2, status: 'done' });
 
     // ── Inject "Edit site" FAB ──
-    // After repo name is known, embed a floating edit button into the generated HTML.
-    // The button links back to this platform generator so operators can iterate quickly.
-    if (PLATFORM_URL) {
-      const editUrl = `${PLATFORM_URL}/?editRepo=${encodeURIComponent(repoFullName)}&customerName=${encodeURIComponent(customerName)}`;
+    // Always inject — self-contained button+overlay, no env var required.
+    // Platform URL priority: (1) build-time PLATFORM_URL, (2) localStorage 'plt_url', (3) user-entered in overlay.
+    {
+      const bakeUrl = PLATFORM_URL || '';
+      const safeRepo = JSON.stringify(repoFullName);
+      const safeName = JSON.stringify(customerName);
+      const safeBase = JSON.stringify(bakeUrl);
       const editFab = `
-  <!-- BackOffice Platform edit shortcut -->
-  <a id="plt-edit-fab" href="${editUrl}" target="_blank" rel="noopener" title="Edit this site" style="position:fixed;bottom:20px;right:20px;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,0.96);border:1px solid rgba(0,0,0,0.1);border-radius:24px;box-shadow:0 2px 12px rgba(0,0,0,0.12);font-family:system-ui,-apple-system,sans-serif;font-size:13px;font-weight:500;color:#374151;z-index:9999;text-decoration:none;backdrop-filter:blur(8px);" onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.18)';this.style.transform='translateY(-1px)'" onmouseout="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.12)';this.style.transform=''"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit site</a>`;
+<!-- BackOffice Platform edit shortcut -->
+<div id="_plt_fab_root" style="position:fixed;bottom:20px;right:20px;z-index:2147483647;font-family:system-ui,-apple-system,sans-serif">
+  <button id="_plt_fab_btn" title="Edit this site" style="display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:rgba(255,255,255,0.96);border:1px solid rgba(0,0,0,0.1);border-radius:24px;box-shadow:0 2px 12px rgba(0,0,0,0.15);font-size:13px;font-weight:500;color:#374151;cursor:pointer;backdrop-filter:blur(8px);transition:box-shadow .15s,transform .15s" onmouseover="this.style.boxShadow='0 4px 20px rgba(0,0,0,0.22)';this.style.transform='translateY(-1px)'" onmouseout="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.15)';this.style.transform=''"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit site</button>
+  <div id="_plt_overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:16px;padding:24px;width:min(420px,90vw);box-shadow:0 8px 40px rgba(0,0,0,0.22)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <strong style="font-size:15px">Edit this site with AI</strong>
+        <button id="_plt_close" style="background:none;border:none;cursor:pointer;font-size:20px;color:#6b7280;line-height:1">×</button>
+      </div>
+      <div id="_plt_url_row" style="display:none;margin-bottom:12px">
+        <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px">Platform URL</label>
+        <input id="_plt_url_input" type="url" placeholder="https://your-platform.vercel.app" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #d1d5db;border-radius:8px;font-size:13px">
+      </div>
+      <label style="font-size:12px;color:#6b7280;display:block;margin-bottom:4px">Describe your changes</label>
+      <textarea id="_plt_prompt" rows="4" placeholder="e.g. Change the button color to green and update the title to say Welcome" style="width:100%;box-sizing:border-box;padding:10px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;resize:vertical;margin-bottom:12px"></textarea>
+      <button id="_plt_go" style="width:100%;padding:10px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer">Open in Platform →</button>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var repo=${safeRepo},name=${safeName},base=${safeBase};
+  var btn=document.getElementById('_plt_fab_btn');
+  var ov=document.getElementById('_plt_overlay');
+  var cl=document.getElementById('_plt_close');
+  var go=document.getElementById('_plt_go');
+  var urlRow=document.getElementById('_plt_url_row');
+  var urlIn=document.getElementById('_plt_url_input');
+  var pr=document.getElementById('_plt_prompt');
+  function getBase(){return(base||localStorage.getItem('plt_url')||'').replace(/\\/$/,'');}
+  function open(){
+    var b=getBase();
+    if(!b){urlRow.style.display='block';}
+    ov.style.display='flex';
+    pr.focus();
+  }
+  function close(){ov.style.display='none';}
+  btn.addEventListener('click',open);
+  cl.addEventListener('click',close);
+  ov.addEventListener('click',function(e){if(e.target===ov)close();});
+  go.addEventListener('click',function(){
+    var b=getBase()||(urlIn.value||'').replace(/\\/$/,'');
+    if(!b){urlIn.style.border='1px solid #ef4444';urlIn.focus();return;}
+    if(urlIn.value){localStorage.setItem('plt_url',urlIn.value.replace(/\\/$/,''));}
+    var p=pr.value.trim();
+    var url=b+'/?editRepo='+encodeURIComponent(repo)+'&customerName='+encodeURIComponent(name)+(p?'&editPrompt='+encodeURIComponent(p):'');
+    window.open(url,'_blank','noopener');
+    close();
+  });
+})();
+</script>`;
       textFiles['public/index.html'] = textFiles['public/index.html'].replace('</body>', `${editFab}\n</body>`);
     }
 

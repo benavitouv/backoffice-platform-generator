@@ -738,5 +738,7 @@ if (_editRepo) {
     repoFullName: _editRepo,
     customerName: _urlParams.get('customerName') || _editRepo.split('/').pop(),
   });
+  const _prePrompt = _urlParams.get('editPrompt');
+  if (_prePrompt) editPromptInput.value = _prePrompt;
 }
 
